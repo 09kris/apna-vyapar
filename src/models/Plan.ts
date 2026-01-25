@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface IPlan {
   id: number;
@@ -42,36 +43,32 @@ export class Plan extends Model<IPlan> implements IPlan {
   declare isActive: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
-
-  static initialize(sequelize: Sequelize) {
-    Plan.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      name: { type: DataTypes.STRING(50), allowNull: false, unique: true },
-      monthlyPrice: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
-      yearlyPrice: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
-      shopCountLimit: { type: DataTypes.INTEGER, defaultValue: 1 },
-      productCountLimit: { type: DataTypes.INTEGER, defaultValue: 100 },
-      orderCountLimit: { type: DataTypes.INTEGER, defaultValue: 1000 },
-      employeeCountLimit: { type: DataTypes.INTEGER, defaultValue: 5 },
-      hasAdvancedAnalytics: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasAPIAccess: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasCustomDomain: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasMultipleLocations: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasPaymentGateway: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasEmailSupport: { type: DataTypes.BOOLEAN, defaultValue: false },
-      hasPrioritySupport: { type: DataTypes.BOOLEAN, defaultValue: false },
-      features: { type: DataTypes.JSON, defaultValue: [] },
-      isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'plans',
-      timestamps: true
-    });
-
-    return Plan;
-  }
 }
+
+Plan.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING(50), allowNull: false, unique: true },
+  monthlyPrice: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  yearlyPrice: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  shopCountLimit: { type: DataTypes.INTEGER, defaultValue: 1 },
+  productCountLimit: { type: DataTypes.INTEGER, defaultValue: 100 },
+  orderCountLimit: { type: DataTypes.INTEGER, defaultValue: 1000 },
+  employeeCountLimit: { type: DataTypes.INTEGER, defaultValue: 5 },
+  hasAdvancedAnalytics: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasAPIAccess: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasCustomDomain: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasMultipleLocations: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasPaymentGateway: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasEmailSupport: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hasPrioritySupport: { type: DataTypes.BOOLEAN, defaultValue: false },
+  features: { type: DataTypes.JSON, defaultValue: [] },
+  isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'plans',
+  timestamps: true
+});
 
 export default Plan;

@@ -8,8 +8,6 @@ export interface ILocation {
   area: string;
   landmark?: string;
   pincode: string;
-  latitude: number;
-  longitude: number;
   isPrimary: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -23,8 +21,6 @@ export class Location extends Model<ILocation> implements ILocation {
   public area!: string;
   public landmark?: string;
   public pincode!: string;
-  public latitude!: number;
-  public longitude!: number;
   public isPrimary!: boolean;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -62,14 +58,6 @@ Location.init(
       type: DataTypes.STRING(10),
       allowNull: false,
     },
-    latitude: {
-      type: DataTypes.DECIMAL(10, 8),
-      allowNull: false,
-    },
-    longitude: {
-      type: DataTypes.DECIMAL(11, 8),
-      allowNull: false,
-    },
     isPrimary: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -88,7 +76,6 @@ Location.init(
     indexes: [
       { fields: ['shopId'] },
       { fields: ['city'] },
-      { fields: ['latitude', 'longitude'] },
     ],
   }
 );

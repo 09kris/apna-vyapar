@@ -136,8 +136,6 @@ curl -X POST http://localhost:5000/api/shops \
     "city": "Mumbai",
     "state": "Maharashtra",
     "pincode": "400001",
-    "latitude": 19.0760,
-    "longitude": 72.8777,
     "phone": "9876543210",
     "email": "shop@abc.com",
     "description": "Best electronics store in Mumbai"
@@ -396,18 +394,16 @@ curl -X GET "http://localhost:5000/api/analytics/dashboard?shopId=507f1f77bcf86c
   -H "Authorization: Bearer <YOUR_TOKEN>"
 ```
 
----
-
 ## 🗺️ Location Services
 
-### Search Shops by Location
+### Search Shops by City/Category
 ```bash
-curl -X GET "http://localhost:5000/api/locations/search?latitude=19.0760&longitude=72.8777&radius=10&category=Electronics"
+curl -X GET "http://localhost:5000/api/locations/search?city=Mumbai&category=Electronics&page=1&limit=10"
 ```
 
-### Find Nearby Shops
+### Find Nearby Shops by City
 ```bash
-curl -X GET "http://localhost:5000/api/locations/nearby?latitude=19.0760&longitude=72.8777&radius=5"
+curl -X GET "http://localhost:5000/api/locations/nearby?city=Mumbai&limit=10"
 ```
 
 ---

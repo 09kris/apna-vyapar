@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface ISubscription {
   id: number;
@@ -39,41 +40,37 @@ export class Subscription extends Model<ISubscription> implements ISubscription 
   declare shop?: any;
   declare plan?: any;
   declare payments?: any[];
-
-  static initialize(sequelize: Sequelize) {
-    Subscription.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      shopId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'shops', key: 'id' },
-        unique: true
-      },
-      planId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'plans', key: 'id' }
-      },
-      billingCycle: { type: DataTypes.ENUM('monthly', 'yearly'), defaultValue: 'monthly' },
-      startDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-      renewalDate: { type: DataTypes.DATE, allowNull: false },
-      endDate: { type: DataTypes.DATE },
-      status: { type: DataTypes.ENUM('active', 'inactive', 'suspended', 'cancelled'), defaultValue: 'active' },
-      autoRenew: { type: DataTypes.BOOLEAN, defaultValue: true },
-      currentUsage: { type: DataTypes.JSON, defaultValue: { shops: 0, products: 0, orders: 0, employees: 0 } },
-      isPaymentPending: { type: DataTypes.BOOLEAN, defaultValue: false },
-      lastPaymentDate: { type: DataTypes.DATE },
-      nextPaymentDate: { type: DataTypes.DATE, allowNull: false },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'subscriptions',
-      timestamps: true
-    });
-
-    return Subscription;
-  }
 }
+
+Subscription.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  shopId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Shops', key: 'id' },
+    unique: true
+  },
+  planId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Plans', key: 'id' }
+  },
+  billingCycle: { type: DataTypes.ENUM('monthly', 'yearly'), defaultValue: 'monthly' },
+  startDate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  renewalDate: { type: DataTypes.DATE, allowNull: false },
+  endDate: { type: DataTypes.DATE },
+  status: { type: DataTypes.ENUM('active', 'inactive', 'suspended', 'cancelled'), defaultValue: 'active' },
+  autoRenew: { type: DataTypes.BOOLEAN, defaultValue: true },
+  currentUsage: { type: DataTypes.JSON, defaultValue: { shops: 0, products: 0, orders: 0, employees: 0 } },
+  isPaymentPending: { type: DataTypes.BOOLEAN, defaultValue: false },
+  lastPaymentDate: { type: DataTypes.DATE },
+  nextPaymentDate: { type: DataTypes.DATE, allowNull: false },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'subscriptions',
+  timestamps: true
+});
 
 export default Subscription;

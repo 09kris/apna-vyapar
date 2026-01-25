@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface IAbuseReport {
   id: number;
@@ -37,53 +38,49 @@ export class AbuseReport extends Model<IAbuseReport> implements IAbuseReport {
   declare shop?: any;
   declare reporter?: any;
   declare investigator?: any;
-
-  static initialize(sequelize: Sequelize) {
-    AbuseReport.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      shopId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'shops', key: 'id' }
-      },
-      reportedBy: { 
-        type: DataTypes.INTEGER,
-        references: { model: 'users', key: 'id' }
-      },
-      reportType: { 
-        type: DataTypes.ENUM('fraud', 'quality_issue', 'fake_products', 'unsafe_transaction', 'harassment', 'other'),
-        allowNull: false
-      },
-      severity: { 
-        type: DataTypes.ENUM('low', 'medium', 'high', 'critical'), 
-        defaultValue: 'medium'
-      },
-      description: { type: DataTypes.TEXT, allowNull: false },
-      evidence: { type: DataTypes.JSON, defaultValue: [] },
-      status: { type: DataTypes.ENUM('open', 'investigating', 'resolved', 'dismissed'), defaultValue: 'open' },
-      actionTaken: { type: DataTypes.ENUM('warning', 'suspension', 'permanent_ban', 'none') },
-      investigatedBy: { 
-        type: DataTypes.INTEGER,
-        references: { model: 'super_admins', key: 'id' }
-      },
-      investigationNotes: { type: DataTypes.TEXT },
-      resolvedAt: { type: DataTypes.DATE },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'abuse_reports',
-      timestamps: true,
-      indexes: [
-        { fields: ['shopId'] },
-        { fields: ['status'] },
-        { fields: ['severity'] },
-        { fields: ['createdAt'] }
-      ]
-    });
-
-    return AbuseReport;
-  }
 }
+
+AbuseReport.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  shopId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Shops', key: 'id' }
+  },
+  reportedBy: { 
+    type: DataTypes.INTEGER,
+    references: { model: 'Users', key: 'id' }
+  },
+  reportType: { 
+    type: DataTypes.ENUM('fraud', 'quality_issue', 'fake_products', 'unsafe_transaction', 'harassment', 'other'),
+    allowNull: false
+  },
+  severity: { 
+    type: DataTypes.ENUM('low', 'medium', 'high', 'critical'), 
+    defaultValue: 'medium'
+  },
+  description: { type: DataTypes.TEXT, allowNull: false },
+  evidence: { type: DataTypes.JSON, defaultValue: [] },
+  status: { type: DataTypes.ENUM('open', 'investigating', 'resolved', 'dismissed'), defaultValue: 'open' },
+  actionTaken: { type: DataTypes.ENUM('warning', 'suspension', 'permanent_ban', 'none') },
+  investigatedBy: { 
+    type: DataTypes.INTEGER,
+    references: { model: 'super_admins', key: 'id' }
+  },
+  investigationNotes: { type: DataTypes.TEXT },
+  resolvedAt: { type: DataTypes.DATE },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'abuse_reports',
+  timestamps: true,
+  indexes: [
+    { fields: ['shopId'] },
+    { fields: ['status'] },
+    { fields: ['severity'] },
+    { fields: ['createdAt'] }
+  ]
+});
 
 export default AbuseReport;

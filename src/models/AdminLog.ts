@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface IAdminLog {
   id: number;
@@ -27,55 +28,53 @@ export class AdminLog extends Model<IAdminLog> implements IAdminLog {
 
   // Associations
   declare admin?: any;
-
-  static initialize(sequelize: Sequelize) {
-    AdminLog.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      adminId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'super_admins', key: 'id' }
-      },
-      action: { 
-        type: DataTypes.ENUM(
-          'shop_approved', 
-          'shop_blocked', 
-          'shop_unblocked',
-          'kyc_verified', 
-          'kyc_rejected',
-          'abuse_resolved', 
-          'subscription_changed',
-          'subscription_suspended',
-          'payment_recorded',
-          'user_suspended',
-          'features_updated'
-        ),
-        allowNull: false
-      },
-      entityType: { 
-        type: DataTypes.ENUM('shop', 'subscription', 'kyc', 'abuse_report', 'user'),
-        allowNull: false
-      },
-      entityId: { type: DataTypes.INTEGER, allowNull: false },
-      changes: { type: DataTypes.JSON, defaultValue: {} },
-      ipAddress: { type: DataTypes.STRING(45) },
-      userAgent: { type: DataTypes.STRING(500) },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'admin_logs',
-      timestamps: true,
-      indexes: [
-        { fields: ['adminId'] },
-        { fields: ['action'] },
-        { fields: ['entityType', 'entityId'] },
-        { fields: ['createdAt'] }
-      ]
-    });
-
-    return AdminLog;
-  }
 }
 
+AdminLog.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  adminId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'super_admins', key: 'id' }
+  },
+  action: { 
+    type: DataTypes.ENUM(
+      'shop_approved', 
+      'shop_blocked', 
+      'shop_unblocked',
+      'kyc_verified', 
+      'kyc_rejected',
+      'abuse_resolved', 
+      'subscription_changed',
+      'subscription_suspended',
+      'payment_recorded',
+      'user_suspended',
+      'features_updated'
+    ),
+    allowNull: false
+  },
+  entityType: { 
+    type: DataTypes.ENUM('shop', 'subscription', 'kyc', 'abuse_report', 'user'),
+    allowNull: false
+  },
+  entityId: { type: DataTypes.INTEGER, allowNull: false },
+  changes: { type: DataTypes.JSON, defaultValue: {} },
+  ipAddress: { type: DataTypes.STRING(45) },
+  userAgent: { type: DataTypes.STRING(500) },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'admin_logs',
+  timestamps: true,
+  indexes: [
+    { fields: ['adminId'] },
+    { fields: ['action'] },
+    { fields: ['entityType', 'entityId'] },
+    { fields: ['createdAt'] }
+  ]
+});
+
 export default AdminLog;
+
+

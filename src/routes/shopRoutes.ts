@@ -15,12 +15,12 @@ router.post('/', verifyToken, requireRole(['owner', 'admin']), asyncHandler(asyn
   const userId = req.userId;
   const {
     shopName, shopType, category, address, city, state, pincode,
-    latitude, longitude, phone, alternatePhone, email, gstNumber,
+    phone, alternatePhone, email, gstNumber,
     panNumber, openingTime, closingTime, description
   } = req.body;
 
   if (!shopName || !category || !address || !city || !state || !pincode) {
-    throw new ApiError('Missing required shop details', 400);
+    throw new ApiError('Missing required shop details (shopName, category, address, city, state, pincode)', 400);
   }
 
   const existingShop = await Shop.findOne({ where: { ownerId: userId } });
@@ -34,15 +34,14 @@ router.post('/', verifyToken, requireRole(['owner', 'admin']), asyncHandler(asyn
   const shop = await Shop.create({
     shopName, ownerId: userIdNum, referralCode,
     shopType: shopType || 'retail', category, address, city, state, pincode,
-    latitude, longitude, phone, alternatePhone, email,
+    phone, alternatePhone, email,
     gstNumber, panNumber, openingTime, closingTime, description,
     isActive: true, isVerified: false, totalOrders: 0, totalRevenue: 0,
     kycStatus: 'pending', isBlocked: false
   });
 
   await Location.create({
-    shopId: shop.id, city, area: category, pincode,
-    latitude, longitude, isPrimary: true
+    shopId: shop.id, city, area: category, pincode, isPrimary: true
   });
 
   res.status(201).json({

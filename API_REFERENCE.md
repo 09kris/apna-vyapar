@@ -125,8 +125,6 @@ Content-Type: application/json
   "city": "Mumbai",
   "state": "Maharashtra",
   "pincode": "400001",
-  "latitude": 19.0760,
-  "longitude": 72.8777,
   "phone": "9876543210",
   "alternatePhone": "9876543211",
   "email": "shop@abc.com",
@@ -206,8 +204,6 @@ Content-Type: application/json
   "city": "Mumbai",
   "state": "Maharashtra",
   "pincode": "400001",
-  "latitude": 19.0760,
-  "longitude": 72.8777,
   "phone": "9876543210",
   "email": "shop@abc.com",
   "gstNumber": "18AABCT1234A1Z0",
@@ -1098,57 +1094,42 @@ Content-Type: application/json
 
 ## 📍 Location Endpoints
 
-### 1. Search Shops by Location
+### 1. Search Shops by City/Category
 **GET** `/locations/search`
 
 **Query Parameters**:
-- `latitude` - User's latitude (required)
-- `longitude` - User's longitude (required)
-- `radius` - Search radius in km (default: 10)
-- `category` - Filter by category
-- `city` - Filter by city
+- `city` - City name (optional)
+- `category` - Filter by category (optional)
+- `page` - Page number (default: 1)
+- `limit` - Records per page (default: 10)
 
 **Response (200)**:
 ```json
 {
   "shops": [
     {
-      "_id": "507f1f77bcf86cd799439012",
+      "id": "507f1f77bcf86cd799439012",
       "shopName": "ABC Electronics",
       "category": "Electronics",
       "city": "Mumbai",
       "phone": "9876543210",
-      "distance": 2.5,
-      "isActive": true
-    },
-    {
-      "_id": "507f1f77bcf86cd799439022",
-      "shopName": "XYZ Mobile Store",
-      "category": "Electronics",
-      "city": "Mumbai",
-      "phone": "9876543220",
-      "distance": 4.3,
+      "address": "123 Main Street",
+      "state": "Maharashtra",
       "isActive": true
     }
   ],
-  "total": 2,
-  "search": {
-    "latitude": 19.0760,
-    "longitude": 72.8777,
-    "radius": 10
-  }
+  "total": 1
 }
 ```
 
 ---
 
-### 2. Get Nearby Shops
+### 2. Get Nearby Shops by City
 **GET** `/locations/nearby`
 
 **Query Parameters**:
-- `latitude` - User's latitude (required)
-- `longitude` - User's longitude (required)
-- `radius` - Search radius in km (default: 5)
+- `city` - City name (required)
+- `limit` - Records per page (default: 10)
 
 **Response (200)**:
 ```json
@@ -1159,7 +1140,7 @@ Content-Type: application/json
     "category": "Electronics",
     "city": "Mumbai",
     "phone": "9876543210",
-    "distance": 2.5
+    "address": "123 Main Street"
   },
   {
     "id": "507f1f77bcf86cd799439022",
@@ -1181,14 +1162,12 @@ Content-Type: application/json
 **Request**:
 ```json
 {
-  "shopId": "507f1f77bcf86cd799439012",
   "city": "Mumbai",
   "area": "Fort",
   "landmark": "Near CST Station",
   "pincode": "400001",
-  "latitude": 18.9432,
-  "longitude": 72.8349,
   "isPrimary": false
+}
 }
 ```
 
@@ -1214,13 +1193,12 @@ Content-Type: application/json
 ```json
 [
   {
-    "_id": "507f1f77bcf86cd799439023",
+    "id": "507f1f77bcf86cd799439023",
+    "shopId": "507f1f77bcf86cd799439012",
     "city": "Mumbai",
     "area": "Fort",
     "landmark": "Near CST Station",
     "pincode": "400001",
-    "latitude": 18.9432,
-    "longitude": 72.8349,
     "isPrimary": true,
     "createdAt": "2026-01-20T12:00:00.000Z"
   }

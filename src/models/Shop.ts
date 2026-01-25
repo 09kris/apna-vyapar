@@ -12,8 +12,6 @@ export interface IShop {
   city: string;
   state: string;
   pincode: string;
-  latitude: number;
-  longitude: number;
   phone?: string;
   alternatePhone?: string;
   email?: string;
@@ -46,8 +44,6 @@ export class Shop extends Model<IShop> implements IShop {
   public city!: string;
   public state!: string;
   public pincode!: string;
-  public latitude!: number;
-  public longitude!: number;
   public phone?: string;
   public alternatePhone?: string;
   public email?: string;
@@ -115,14 +111,6 @@ Shop.init(
     },
     pincode: {
       type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-    latitude: {
-      type: DataTypes.DECIMAL(10, 8),
-      allowNull: false,
-    },
-    longitude: {
-      type: DataTypes.DECIMAL(11, 8),
       allowNull: false,
     },
     phone: {
@@ -204,7 +192,6 @@ Shop.init(
       { fields: ['referralCode'] },
       { fields: ['ownerId'] },
       { fields: ['city'] },
-      { fields: ['latitude', 'longitude'] },
     ],
   }
 );

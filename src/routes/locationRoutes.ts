@@ -6,84 +6,69 @@ import { Op } from 'sequelize';
 
 const router: Router = express.Router();
 
-// Haversine formula for distance
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-// Search shops by location
+// Search shops by city/category
 router.get('/search', asyncHandler(async (req: Request, res: Response) => {
-  const { latitude, longitude, radius = '10', category, city } = req.query;
+  const { city, category, page = '1', limit = '10' } = req.query;
 
-  if (!latitude || !longitude) {
-    throw new ApiError('Latitude and longitude required', 400);
+  if (!city && !category) {
+    throw new ApiError('City or category required for search', 400);
   }
 
-  const lat = parseFloat(latitude as string);
-  const lon = parseFloat(longitude as string);
-  const rad = parseInt(radius as string);
+  const filter: any = {};
+  if (city) filter.city = city;
 
   const locations = await Location.findAll({
-    include: [{ association: 'shop', where: { isActive: true } }],
-    raw: false
+    where: filter,
+    include: [{ 
+      association: 'shop', 
+      where: category ? { category } : undefined,
+      attributes: ['id', 'shopName', 'category', 'city', 'state', 'address', 'phone', 'email']
+    }],
+    limit: parseInt(limit as string),
+    offset: (parseInt(page as string) - 1) * parseInt(limit as string),
+    order: [['createdAt', 'DESC']],
+    raw: false,
+    subQuery: false
   });
 
-  const nearby = locations
-    .map(loc => ({
-      ...loc.toJSON(),
-      distance: haversineDistance(lat, lon, parseFloat(loc.latitude as any), parseFloat(loc.longitude as any))
-    }))
-    .filter(loc => loc.distance <= rad)
-    .sort((a, b) => a.distance - b.distance);
-
-  res.json({ shops: nearby, total: nearby.length, search: { latitude: lat, longitude: lon, radius: rad } });
+  const shops = locations.map(loc => loc.toJSON());
+  res.json({ shops, total: shops.length });
 }));
 
-// Get nearby shops
+// Get nearby shops (by city)
 router.get('/nearby', asyncHandler(async (req: Request, res: Response) => {
-  const { latitude, longitude, radius = '5' } = req.query;
+  const { city, limit = '10' } = req.query;
 
-  if (!latitude || !longitude) {
-    throw new ApiError('Latitude and longitude required', 400);
+  if (!city) {
+    throw new ApiError('City required parameter', 400);
   }
 
-  const lat = parseFloat(latitude as string);
-  const lon = parseFloat(longitude as string);
-
   const locations = await Location.findAll({
-    limit: 20,
-    include: ['shop']
+    where: { city: city as string },
+    include: [{ 
+      association: 'shop',
+      where: { isActive: true },
+      attributes: ['id', 'shopName', 'category', 'city', 'state', 'address', 'phone', 'email']
+    }],
+    limit: parseInt(limit as string),
+    order: [['createdAt', 'DESC']]
   });
 
-  const nearby = locations
-    .map((loc: any) => ({
-      id: loc.shopId,
-      ...(loc.shop?.toJSON?.() || {}),
-      distance: haversineDistance(lat, lon, parseFloat(loc.latitude as any), parseFloat(loc.longitude as any))
-    }))
-    .sort((a, b) => a.distance - b.distance);
-
-  res.json(nearby);
+  const shops = locations.map(loc => loc.toJSON());
+  res.json(shops);
 }));
 
 // Create location
 router.post('/', verifyToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { shopId, city, area, landmark, pincode, latitude, longitude, isPrimary = false } = req.body;
+  const { shopId, city, area, landmark, pincode, isPrimary = false } = req.body;
   const shopIdNum = parseInt(shopId as string);
 
-  if (!shopId || isNaN(shopIdNum) || !city || !area || !pincode || !latitude || !longitude) {
-    throw new ApiError('Missing required fields', 400);
+  if (!shopId || isNaN(shopIdNum) || !city || !area || !pincode) {
+    throw new ApiError('Missing required fields: shopId, city, area, pincode', 400);
   }
 
   const location = await Location.create({
-    shopId: shopIdNum, city, area, landmark, pincode, latitude, longitude, isPrimary
+    shopId: shopIdNum, city, area, landmark, pincode, isPrimary
   });
 
   res.status(201).json({ message: 'Location created successfully', location });

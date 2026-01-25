@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface IPaymentRecord {
   id: number;
@@ -39,50 +40,46 @@ export class PaymentRecord extends Model<IPaymentRecord> implements IPaymentReco
   declare subscription?: any;
   declare shop?: any;
   declare plan?: any;
-
-  static initialize(sequelize: Sequelize) {
-    PaymentRecord.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      subscriptionId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'subscriptions', key: 'id' }
-      },
-      shopId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'shops', key: 'id' }
-      },
-      planId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'plans', key: 'id' }
-      },
-      amount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
-      billingCycle: { type: DataTypes.ENUM('monthly', 'yearly'), defaultValue: 'monthly' },
-      paymentMethod: { type: DataTypes.ENUM('card', 'upi', 'bank_transfer', 'wallet'), allowNull: false },
-      paymentGateway: { type: DataTypes.STRING(50) },
-      transactionId: { type: DataTypes.STRING(100), unique: true },
-      status: { type: DataTypes.ENUM('pending', 'completed', 'failed', 'refunded'), defaultValue: 'pending' },
-      invoiceUrl: { type: DataTypes.STRING(500) },
-      paidAt: { type: DataTypes.DATE },
-      failureReason: { type: DataTypes.TEXT },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'payment_records',
-      timestamps: true,
-      indexes: [
-        { fields: ['subscriptionId'] },
-        { fields: ['shopId'] },
-        { fields: ['status'] },
-        { fields: ['createdAt'] }
-      ]
-    });
-
-    return PaymentRecord;
-  }
 }
+
+PaymentRecord.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  subscriptionId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Subscriptions', key: 'id' }
+  },
+  shopId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Shops', key: 'id' }
+  },
+  planId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Plans', key: 'id' }
+  },
+  amount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+  billingCycle: { type: DataTypes.ENUM('monthly', 'yearly'), defaultValue: 'monthly' },
+  paymentMethod: { type: DataTypes.ENUM('card', 'upi', 'bank_transfer', 'wallet'), allowNull: false },
+  paymentGateway: { type: DataTypes.STRING(50) },
+  transactionId: { type: DataTypes.STRING(100), unique: true },
+  status: { type: DataTypes.ENUM('pending', 'completed', 'failed', 'refunded'), defaultValue: 'pending' },
+  invoiceUrl: { type: DataTypes.STRING(500) },
+  paidAt: { type: DataTypes.DATE },
+  failureReason: { type: DataTypes.TEXT },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'payment_records',
+  timestamps: true,
+  indexes: [
+    { fields: ['subscriptionId'] },
+    { fields: ['shopId'] },
+    { fields: ['status'] },
+    { fields: ['createdAt'] }
+  ]
+});
 
 export default PaymentRecord;

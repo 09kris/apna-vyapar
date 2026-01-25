@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface IKYCVerification {
   id: number;
@@ -43,51 +44,47 @@ export class KYCVerification extends Model<IKYCVerification> implements IKYCVeri
   declare shop?: any;
   declare user?: any;
   declare verifier?: any;
-
-  static initialize(sequelize: Sequelize) {
-    KYCVerification.init({
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      shopId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'shops', key: 'id' },
-        unique: true
-      },
-      userId: { 
-        type: DataTypes.INTEGER, 
-        allowNull: false,
-        references: { model: 'users', key: 'id' }
-      },
-      gstCertificate: { type: DataTypes.STRING(500) },
-      panCard: { type: DataTypes.STRING(500) },
-      aadhaarCard: { type: DataTypes.STRING(500) },
-      businessLicense: { type: DataTypes.STRING(500) },
-      bankAccountProof: { type: DataTypes.STRING(500) },
-      ownerIdProof: { type: DataTypes.STRING(500) },
-      documentDetails: { type: DataTypes.JSON, defaultValue: {} },
-      status: { type: DataTypes.ENUM('pending', 'approved', 'rejected', 'needs_revision'), defaultValue: 'pending' },
-      rejectionReason: { type: DataTypes.TEXT },
-      verifiedBy: { 
-        type: DataTypes.INTEGER,
-        references: { model: 'super_admins', key: 'id' }
-      },
-      verifiedAt: { type: DataTypes.DATE },
-      expiryDate: { type: DataTypes.DATE },
-      createdAt: { type: DataTypes.DATE },
-      updatedAt: { type: DataTypes.DATE }
-    }, {
-      sequelize,
-      tableName: 'kyc_verifications',
-      timestamps: true,
-      indexes: [
-        { fields: ['shopId'] },
-        { fields: ['status'] },
-        { fields: ['createdAt'] }
-      ]
-    });
-
-    return KYCVerification;
-  }
 }
+
+KYCVerification.init({
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  shopId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Shops', key: 'id' },
+    unique: true
+  },
+  userId: { 
+    type: DataTypes.INTEGER, 
+    allowNull: false,
+    references: { model: 'Users', key: 'id' }
+  },
+  gstCertificate: { type: DataTypes.STRING(500) },
+  panCard: { type: DataTypes.STRING(500) },
+  aadhaarCard: { type: DataTypes.STRING(500) },
+  businessLicense: { type: DataTypes.STRING(500) },
+  bankAccountProof: { type: DataTypes.STRING(500) },
+  ownerIdProof: { type: DataTypes.STRING(500) },
+  documentDetails: { type: DataTypes.JSON, defaultValue: {} },
+  status: { type: DataTypes.ENUM('pending', 'approved', 'rejected', 'needs_revision'), defaultValue: 'pending' },
+  rejectionReason: { type: DataTypes.TEXT },
+  verifiedBy: { 
+    type: DataTypes.INTEGER,
+    references: { model: 'super_admins', key: 'id' }
+  },
+  verifiedAt: { type: DataTypes.DATE },
+  expiryDate: { type: DataTypes.DATE },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  sequelize,
+  tableName: 'kyc_verifications',
+  timestamps: true,
+  indexes: [
+    { fields: ['shopId'] },
+    { fields: ['status'] },
+    { fields: ['createdAt'] }
+  ]
+});
 
 export default KYCVerification;

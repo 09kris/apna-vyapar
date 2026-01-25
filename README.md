@@ -194,7 +194,7 @@ src/
 ### Key Features
 - Soft delete support (deletedAt field)
 - Timestamps on all records
-- Geospatial indexing for location queries
+- City and state-based location queries
 - Role-based access control (RBAC)
 - Full audit trail for inventory transactions
 
@@ -245,9 +245,6 @@ SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
 SMTP_PASS=your_app_password
 FROM_EMAIL=noreply@apnavyapar.com
-
-# Google Maps
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
 # File Upload
 MAX_FILE_SIZE=5242880
