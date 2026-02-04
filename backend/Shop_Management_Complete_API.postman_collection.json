@@ -1,0 +1,1095 @@
+{
+  "info": {
+    "name": "Shop Management System - Complete API Collection",
+    "description": "Complete API collection for Shop Management System with all new features",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"password123\",\n  \"userType\": \"SHOP_OWNER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shop Management",
+      "item": [
+        {
+          "name": "Create Shop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopName\": \"ABC Electronics\",\n  \"shopDescription\": \"Best electronics store in the city\",\n  \"shopCategory\": \"Electronics\",\n  \"shopType\": \"RETAIL\",\n  \"phoneNumber\": \"9876543210\",\n  \"email\": \"abc@electronics.com\",\n  \"website\": \"https://abcelectronics.com\",\n  \"address\": \"123 Main Street\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"zipCode\": \"400001\",\n  \"country\": \"India\",\n  \"latitude\": 19.0760,\n  \"longitude\": 72.8777,\n  \"businessHoursStart\": \"09:00\",\n  \"businessHoursEnd\": \"21:00\",\n  \"establishedYear\": 2020,\n  \"gstNumber\": \"27ABCDE1234F1Z5\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shops",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops"]
+            }
+          }
+        },
+        {
+          "name": "Get My Shops",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/my-shops",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "my-shops"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Shop",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopDescription\": \"Updated description\",\n  \"businessHoursStart\": \"08:00\",\n  \"businessHoursEnd\": \"22:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Category Management",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"categoryName\": \"Electronics\",\n  \"description\": \"Electronic items and gadgets\",\n  \"sortOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"productCode\": \"IPHONE14-001\",\n  \"productName\": \"iPhone 14 Pro\",\n  \"description\": \"Latest iPhone with advanced features\",\n  \"brand\": \"Apple\",\n  \"retailPrice\": 79900,\n  \"wholesalePrice\": 75000,\n  \"costPrice\": 70000,\n  \"mrp\": 79900,\n  \"stockQuantity\": 50,\n  \"reorderLevel\": 10,\n  \"unit\": \"piece\",\n  \"weight\": 0.206,\n  \"dimensions\": \"14.7×7.15×0.79\",\n  \"warrantyMonths\": 12,\n  \"returnDays\": 7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/products?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Management",
+      "item": [
+        {
+          "name": "Add Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"fullName\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"9876543211\",\n  \"designation\": \"Sales Manager\",\n  \"salary\": 25000,\n  \"joiningDate\": \"2024-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "employees"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer Management",
+      "item": [
+        {
+          "name": "Add Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"customerType\": \"RETAIL\",\n  \"referralCodeUsed\": \"REF-ABC123\",\n  \"fullName\": \"Mike Johnson\",\n  \"email\": \"mike@example.com\",\n  \"phone\": \"9876543212\",\n  \"address\": \"456 Oak Street\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"pincode\": \"400002\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "customers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"customerId\": \"{{customerId}}\",\n  \"orderType\": \"RETAIL\",\n  \"paymentMethod\": \"UPI\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2,\n      \"unitPrice\": 79900\n    }\n  ],\n  \"deliveryAddress\": \"456 Oak Street, Mumbai\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Referral Code Management",
+      "item": [
+        {
+          "name": "Create Referral Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"name\": \"Electronics Sale\",\n  \"description\": \"Special electronics collection\",\n  \"selectionType\": \"categories\",\n  \"selectedCategories\": [\"{{categoryId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/referral-codes",
+              "host": ["{{baseUrl}}"],
+              "path": ["referral-codes"]
+            }
+          }
+        },
+        {
+          "name": "Create Product-Specific Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"name\": \"Featured Products\",\n  \"description\": \"Hand-picked premium items\",\n  \"selectionType\": \"products\",\n  \"selectedProducts\": [\"{{productId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/referral-codes",
+              "host": ["{{baseUrl}}"],
+              "path": ["referral-codes"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Referral Codes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/referral-codes",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "referral-codes"]
+            }
+          }
+        },
+        {
+          "name": "Access Catalog via Referral (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referralCode\": \"REF-ABC123\",\n  \"gstNumber\": \"27ABCDE1234F1Z5\",\n  \"deviceInfo\": {\n    \"type\": \"Mobile\",\n    \"browser\": \"Chrome\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/catalog/access-referral",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "access-referral"]
+            }
+          }
+        },
+        {
+          "name": "Get Referral Products (Public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/catalog/referral/REF-ABC123/products?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "referral", "REF-ABC123", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Catalog",
+      "item": [
+        {
+          "name": "Enable Public View",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/public-catalog/enable",
+              "host": ["{{baseUrl}}"],
+              "path": ["public-catalog", "enable"]
+            }
+          }
+        },
+        {
+          "name": "Get Public Shops (Public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/public-catalog/shops",
+              "host": ["{{baseUrl}}"],
+              "path": ["public-catalog", "shops"]
+            }
+          }
+        },
+        {
+          "name": "Get Public Products (Public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/public-catalog/products?shopId={{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["public-catalog", "products"],
+              "query": [
+                {
+                  "key": "shopId",
+                  "value": "{{shopId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Public Products (Public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/public-catalog/all-products",
+              "host": ["{{baseUrl}}"],
+              "path": ["public-catalog", "all-products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loyalty Points",
+      "item": [
+        {
+          "name": "Get Loyalty Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}/loyalty/balance",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "{{customerId}}", "loyalty", "balance"]
+            }
+          }
+        },
+        {
+          "name": "Add Loyalty Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"points\": 100,\n  \"reason\": \"Purchase reward\",\n  \"orderId\": \"{{orderId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/points/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty", "points", "add"]
+            }
+          }
+        },
+        {
+          "name": "Redeem Loyalty Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"points\": 50,\n  \"reason\": \"Discount redemption\",\n  \"orderId\": \"{{orderId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/points/redeem",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty", "points", "redeem"]
+            }
+          }
+        },
+        {
+          "name": "Calculate Order Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderAmount\": 5000,\n  \"customerId\": \"{{customerId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/points/calculate",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty", "points", "calculate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"shopId\": \"{{shopId}}\",\n  \"notificationType\": \"Order\",\n  \"title\": \"New Order Received\",\n  \"message\": \"You have received a new order #ORD-001\",\n  \"priority\": \"High\",\n  \"actionUrl\": \"/orders/{{orderId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/notifications?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "{{notificationId}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Create Stock Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"iPhone 14 Pro\",\n  \"currentStock\": 5,\n  \"reorderLevel\": 10,\n  \"shopId\": \"{{shopId}}\",\n  \"userIds\": [\"{{userId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/stock-alert",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "stock-alert"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "item": [
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": \"{{shopId}}\",\n  \"couponCode\": \"FIRST100\",\n  \"discountType\": \"Fixed\",\n  \"discountValue\": 100,\n  \"minPurchase\": 500,\n  \"usageLimit\": 100,\n  \"validFrom\": \"2024-01-01\",\n  \"validUntil\": \"2024-12-31\",\n  \"applicableTo\": \"All\",\n  \"description\": \"First time customer discount\",\n  \"createdBy\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Coupons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/coupons",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "coupons"]
+            }
+          }
+        },
+        {
+          "name": "Validate Coupon (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"couponCode\": \"FIRST100\",\n  \"orderAmount\": 1500,\n  \"shopId\": \"{{shopId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"couponCode\": \"FIRST100\",\n  \"shopId\": \"{{shopId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/apply",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "apply"]
+            }
+          }
+        },
+        {
+          "name": "Generate Coupon Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prefix\": \"SALE\",\n  \"length\": 6\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/generate-code",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "generate-code"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/dashboard?period=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "dashboard"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sales Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/sales?startDate=2024-01-01&endDate=2024-12-31&groupBy=day",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "sales"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Product Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/products?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "products"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Inventory Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "inventory"]
+            }
+          }
+        },
+        {
+          "name": "Financial Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/analytics/financial?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "analytics", "financial"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll Management",
+      "item": [
+        {
+          "name": "Generate Payroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"salaryMonth\": \"2024-01\",\n  \"workingDays\": 26,\n  \"overtimeHours\": 10,\n  \"bonus\": 2000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "generate"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Payroll",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shops/{{shopId}}/payroll?month=2024-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["shops", "{{shopId}}", "payroll"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2024-01"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1305 @@
+{
+  "info": {
+    "name": "Apna Vyapar API",
+    "description": "Complete API collection for Apna Vyapar Backend - Ready to Run",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"accessToken\", jsonData.data.accessToken);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.data.refreshToken);",
+                  "    pm.environment.set(\"userId\", jsonData.data.user._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"shopowner@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"Shop Owner\",\n  \"role\": \"SHOP_OWNER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"accessToken\", jsonData.data.accessToken);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.data.refreshToken);",
+                  "    pm.environment.set(\"userId\", jsonData.data.user._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"shopowner@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Access Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/current-user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "current-user"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shop Management",
+      "item": [
+        {
+          "name": "Add Shop",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"shopId\", jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Shop\",\n  \"description\": \"My first shop\",\n  \"address\": \"123 Main Street\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"pincode\": \"10001\",\n  \"phone\": \"9876543210\",\n  \"email\": \"shop@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "add"]
+            }
+          }
+        },
+        {
+          "name": "Get My Shops",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/my-shops",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "my-shops"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Shop",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Shop Name\",\n  \"description\": \"Updated description\",\n  \"address\": \"456 Oak Avenue\",\n  \"city\": \"Boston\",\n  \"state\": \"MA\",\n  \"pincode\": \"02101\",\n  \"phone\": \"9876543211\",\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Shop Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/toggle-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "toggle-status"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Delete Shop",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Management",
+      "item": [
+        {
+          "name": "Configure Employee Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"fieldName\": \"empId\",\n      \"fieldType\": \"String\",\n      \"isRequired\": true\n    },\n    {\n      \"fieldName\": \"department\",\n      \"fieldType\": \"String\",\n      \"isRequired\": false\n    },\n    {\n      \"fieldName\": \"salary\",\n      \"fieldType\": \"Number\",\n      \"isRequired\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/{{shopId}}/configure-fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "{{shopId}}", "configure-fields"]
+            }
+          }
+        },
+        {
+          "name": "Get Employee Field Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/{{shopId}}/field-configuration",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "{{shopId}}", "field-configuration"]
+            }
+          }
+        },
+        {
+          "name": "Add Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"employeeId\", jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"9876543210\",\n  \"empId\": \"EMP001\",\n  \"department\": \"Sales\",\n  \"salary\": 50000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/{{shopId}}/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "{{shopId}}", "add"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/{{shopId}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "{{shopId}}", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/details/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "details", "{{employeeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"9876543211\",\n  \"empId\": \"EMP002\",\n  \"department\": \"HR\",\n  \"salary\": 55000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/update/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "update", "{{employeeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "{{employeeId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Category Management",
+      "item": [
+        {
+          "name": "Configure Category Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"fieldName\": \"categoryName\",\n      \"fieldType\": \"String\",\n      \"isRequired\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/categories/configure-fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "categories", "configure-fields"]
+            }
+          }
+        },
+        {
+          "name": "Get Category Field Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/categories/field-config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "categories", "field-config"]
+            }
+          }
+        },
+        {
+          "name": "Add Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"categoryId\", jsonData.data.categoryId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryName\": \"Electronics\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryName\": \"Updated Electronics\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "Configure Product Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"fieldName\": \"productName\",\n      \"fieldType\": \"String\",\n      \"isRequired\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/products/configure-fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "products", "configure-fields"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Field Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/products/field-config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "products", "field-config"]
+            }
+          }
+        },
+        {
+          "name": "Add Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"productId\", jsonData.data.productId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"Laptop\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"retailPrice\": 1000,\n  \"wholesalePrice\": 900,\n  \"unit\": \"pcs\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"Updated Laptop\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Products by Reference Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/reference/SHOP123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "reference", "SHOP123"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory Management",
+      "item": [
+        {
+          "name": "Create Inventory Transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"transactionId\", jsonData.data.transactionId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"transactionType\": \"STOCK_IN\",\n  \"quantityChange\": 10,\n  \"unitCost\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/inventory/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "inventory", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Inventory Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/inventory/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "inventory", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Inventory Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/inventory/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}", "inventory", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "transactions", "{{transactionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll Management",
+      "item": [
+        {
+          "name": "Configure Payroll Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"fieldName\": \"basicSalary\",\n      \"fieldType\": \"Number\",\n      \"isRequired\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/payroll/configure-fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "payroll", "configure-fields"]
+            }
+          }
+        },
+        {
+          "name": "Get Payroll Field Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/payroll/field-config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "payroll", "field-config"]
+            }
+          }
+        },
+        {
+          "name": "Generate Payroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"salaryMonth\": \"2023-10\",\n  \"basicSalary\": 50000,\n  \"workingDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/payroll/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "payroll", "generate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shop Order Management",
+      "item": [
+        {
+          "name": "Configure Order Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fields\": [\n    {\n      \"fieldName\": \"orderType\",\n      \"fieldType\": \"String\",\n      \"isRequired\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/orders/configure-fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "orders", "configure-fields"]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"orderId\", jsonData.data.orderId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"orderType\": \"SALE\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 1,\n      \"unitPrice\": 1000\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Item Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemStatus\": \"SHIPPED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/order-items/{{orderItemId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "order-items", "{{orderItemId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}", "cancel"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shop Customer Management",
+      "item": [
+        {
+          "name": "Add Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"customerId\", jsonData.data.customerId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Shop Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/shops/{{shopId}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "shops", "{{shopId}}", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Jane Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Blacklist Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}/blacklist",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}", "blacklist"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shopId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderItemId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
