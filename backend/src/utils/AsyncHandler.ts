@@ -4,7 +4,16 @@ type RequestHandler = (req: Request, res: Response, next: NextFunction) => Promi
 
 const asyncHandler = (requestHandler: RequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(requestHandler(req, res, next)).catch(next);
+    console.log('🎯 AsyncHandler: Processing request:', req.method, req.url);
+    Promise.resolve(requestHandler(req, res, next))
+      .then((result) => {
+        console.log('✅ AsyncHandler: Request completed successfully');
+      })
+      .catch((error) => {
+        console.log('❌ AsyncHandler: Error caught:', error.message);
+        console.log('❌ Error stack:', error.stack);
+        next(error);
+      });
   };
 };
 

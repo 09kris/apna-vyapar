@@ -178,7 +178,7 @@ const getReferralProducts = AsyncHandler(async (req: Request, res: Response) => 
 
 // Update referral code
 const updateReferralCode = AsyncHandler(async (req: Request, res: Response) => {
-  const { referralId } = req.params;
+  const { referralId } = req.params as { referralId: string };
   const { name, description, selectionType, selectedCategories, selectedProducts, isActive } = req.body;
 
   const referral = await ReferralCode.findByPk(referralId);
@@ -202,7 +202,7 @@ const updateReferralCode = AsyncHandler(async (req: Request, res: Response) => {
 
 // Delete referral code
 const deleteReferralCode = AsyncHandler(async (req: Request, res: Response) => {
-  const { referralId } = req.params;
+  const { referralId } = req.params as { referralId: string };
 
   const referral = await ReferralCode.findByPk(referralId);
   if (!referral) {

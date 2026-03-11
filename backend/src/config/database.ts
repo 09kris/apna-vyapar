@@ -48,9 +48,9 @@ export const testConnection = async () => {
 };
 
 // Sync all models
-export const syncDatabase = async (force: boolean = false) => {
+export const syncDatabase = async (force: boolean = false, alter: boolean = false) => {
   try {
-    await sequelize.sync({ force });
+    await sequelize.sync({ force, alter });
     console.log('✅ Database synchronized successfully');
   } catch (error) {
     console.error('❌ Error synchronizing database:', error);

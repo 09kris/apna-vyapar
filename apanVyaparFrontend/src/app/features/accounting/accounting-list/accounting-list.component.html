@@ -1,0 +1,183 @@
+<div class="accounting-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Accounting</h1>
+      <p class="page-subtitle">Manage your income and expenses</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="loadDashboard(); loadTransactions()">
+        🔄 Refresh
+      </button>
+      <button class="btn btn-primary" [routerLink]="['/accounting/add']" [queryParams]="{shopId: shopId()}">
+        + Add Transaction
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading accounting data...</div>
+  } @else if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  } @else {
+    <!-- Dashboard Stats -->
+    @if (dashboard()) {
+      <div class="stats-grid">
+        <div class="stat-card income">
+          <div class="stat-icon">📈</div>
+          <div class="stat-content">
+            <h3>Income (This Month)</h3>
+            <p class="stat-value">{{ formatAmount(dashboard()?.currentPeriod?.income || 0) }}</p>
+            @if (dashboard()?.currentPeriod?.incomeGrowth) {
+              <span class="stat-change" [class.positive]="dashboard()!.currentPeriod!.incomeGrowth > 0" [class.negative]="dashboard()!.currentPeriod!.incomeGrowth < 0">
+                {{ dashboard()!.currentPeriod!.incomeGrowth > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()!.currentPeriod!.incomeGrowth || 0) }}%
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="stat-card expense">
+          <div class="stat-icon">📉</div>
+          <div class="stat-content">
+            <h3>Expenses (This Month)</h3>
+            <p class="stat-value">{{ formatAmount(dashboard()?.currentPeriod?.expense || 0) }}</p>
+            @if (dashboard()?.currentPeriod?.expenseGrowth) {
+              <span class="stat-change" [class.positive]="dashboard()!.currentPeriod!.expenseGrowth < 0" [class.negative]="dashboard()!.currentPeriod!.expenseGrowth > 0">
+                {{ dashboard()!.currentPeriod!.expenseGrowth > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()!.currentPeriod!.expenseGrowth || 0) }}%
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="stat-card net">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <h3>Net Balance</h3>
+            <p class="stat-value" [class.positive]="dashboard()!.currentPeriod!.net > 0" [class.negative]="dashboard()!.currentPeriod!.net < 0">
+              {{ formatAmount(dashboard()?.currentPeriod?.net || 0) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="stat-card total">
+          <div class="stat-icon">🏦</div>
+          <div class="stat-content">
+            <h3>All Time Balance</h3>
+            <p class="stat-value" [class.positive]="dashboard()!.allTime!.netBalance > 0" [class.negative]="dashboard()!.allTime!.netBalance < 0">
+              {{ formatAmount(dashboard()?.allTime?.netBalance || 0) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <h3 class="section-title">Filters</h3>
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Type</label>
+          <select [(ngModel)]="transactionTypeFilter" (change)="applyFilters()">
+            <option value="">All Types</option>
+            <option value="INCOME">Income</option>
+            <option value="EXPENSE">Expense</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Category</label>
+          <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+            <option value="">All Categories</option>
+            <optgroup label="Income">
+              @for (cat of incomeCategories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </optgroup>
+            <optgroup label="Expense">
+              @for (cat of expenseCategories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" [(ngModel)]="startDateFilter" (change)="applyFilters()">
+        </div>
+
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" [(ngModel)]="endDateFilter" (change)="applyFilters()">
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-outline" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="transactions-section">
+      <h3 class="section-title">Transactions</h3>
+      
+      @if (transactions().length === 0) {
+        <div class="empty-state">
+          <p>No transactions found. Add your first transaction!</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Payment Mode</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (txn of transactions(); track txn.accountingId) {
+                <tr>
+                  <td>{{ formatDate(txn.transactionDate) }}</td>
+                  <td>
+                    <span class="type-badge" [class.income]="txn.transactionType === 'INCOME'" [class.expense]="txn.transactionType === 'EXPENSE'">
+                      {{ txn.transactionType }}
+                    </span>
+                  </td>
+                  <td>{{ getCategoryLabel(txn.category) }}</td>
+                  <td>{{ txn.description || '-' }}</td>
+                  <td class="amount" [class.income]="txn.transactionType === 'INCOME'" [class.expense]="txn.transactionType === 'EXPENSE'">
+                    {{ txn.transactionType === 'INCOME' ? '+' : '-' }} {{ formatAmount(txn.amount) }}
+                  </td>
+                  <td>{{ txn.paymentMode || '-' }}</td>
+                  <td>
+                    <button class="btn-icon btn-delete" (click)="deleteTransaction(txn.accountingId)" title="Delete">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button class="btn btn-outline" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+              Previous
+            </button>
+            <span class="page-info">Page {{ page() }} of {{ totalPages() }}</span>
+            <button class="btn btn-outline" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+              Next
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>
+

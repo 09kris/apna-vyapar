@@ -7,21 +7,21 @@ import {
   updateReferralCode,
   deleteReferralCode
 } from '../controller/ReferralController';
-import authMiddleware from '../middleware/authMiddleware';
+import { authMiddleware, roleMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Create referral code with selected categories (protected)
-router.post('/referral-codes', authMiddleware, createReferralCode);
+// Create referral code with selected categories (protected - SHOP_OWNER only)
+router.post('/referral-codes', authMiddleware, roleMiddleware(['SHOP_OWNER']), createReferralCode);
 
-// Get shop referral codes (protected)
-router.get('/shops/:shopId/referral-codes', authMiddleware, getShopReferralCodes);
+// Get shop referral codes (protected - SHOP_OWNER only)
+router.get('/shops/:shopId/referral-codes', authMiddleware, roleMiddleware(['SHOP_OWNER']), getShopReferralCodes);
 
-// Update referral code (protected)
-router.put('/referral-codes/:referralId', authMiddleware, updateReferralCode);
+// Update referral code (protected - SHOP_OWNER only)
+router.put('/referral-codes/:referralId', authMiddleware, roleMiddleware(['SHOP_OWNER']), updateReferralCode);
 
-// Delete referral code (protected)
-router.delete('/referral-codes/:referralId', authMiddleware, deleteReferralCode);
+// Delete referral code (protected - SHOP_OWNER only)
+router.delete('/referral-codes/:referralId', authMiddleware, roleMiddleware(['SHOP_OWNER']), deleteReferralCode);
 
 // Public catalog access via referral code
 router.post('/catalog/access-referral', accessCatalogByReferral);

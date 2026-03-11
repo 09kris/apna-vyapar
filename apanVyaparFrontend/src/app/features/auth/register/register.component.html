@@ -1,0 +1,115 @@
+<div class="register-container">
+  <div class="register-box">
+    <div class="register-header">
+      <h1 class="logo">Apna Vyapar</h1>
+      <p class="subtitle">Create your account</p>
+    </div>
+    
+    <form class="register-form" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input 
+            type="text" 
+            id="firstName" 
+            [(ngModel)]="firstName" 
+            name="firstName"
+            placeholder="Enter your first name"
+            required
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input 
+            type="text" 
+            id="lastName" 
+            [(ngModel)]="lastName" 
+            name="lastName"
+            placeholder="Enter your last name"
+            required
+          >
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          [(ngModel)]="email" 
+          name="email"
+          placeholder="Enter your email"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          [(ngModel)]="phone" 
+          name="phone"
+          placeholder="Enter your phone number"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          [(ngModel)]="password" 
+          name="password"
+          placeholder="Create a password"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          [(ngModel)]="confirmPassword" 
+          name="confirmPassword"
+          placeholder="Confirm your password"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="userType">Account Type</label>
+        <select 
+          id="userType" 
+          [(ngModel)]="userType" 
+          name="userType"
+          class="user-type-select"
+          required
+        >
+          <option value="SHOP_OWNER">Shop Owner</option>
+          <option value="CUSTOMER">Customer</option>
+        </select>
+      </div>
+
+      <div class="info-message" *ngIf="userType === 'SHOP_OWNER'">
+        <p>After registration, you'll need to complete your shop profile with business details.</p>
+      </div>
+      
+      <div class="error-message" *ngIf="error()">
+        {{ error() }}
+      </div>
+      
+      <button type="submit" class="register-btn" [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">Register</span>
+        <span *ngIf="isLoading()">Creating account...</span>
+      </button>
+    </form>
+    
+    <div class="register-footer">
+      <p>Already have an account? <a routerLink="/login">Login here</a></p>
+    </div>
+  </div>
+</div>

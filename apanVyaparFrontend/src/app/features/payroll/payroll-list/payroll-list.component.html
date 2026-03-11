@@ -1,0 +1,168 @@
+<div class="payroll-container">
+  <div class="page-header">
+    <h1 class="page-title">Payroll</h1>
+    <button class="btn btn-primary" [routerLink]="['/payroll/add']" [queryParams]="{shopId: selectedShopId()}">
+      <span>+ Generate Payroll</span>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="shop">Shop</label>
+        <select 
+          id="shop" 
+          [ngModel]="selectedShopId()" 
+          (ngModelChange)="selectedShopId.set($event); onShopChange()"
+          class="form-control">
+          <option value="">Select Shop</option>
+          @for (shop of shops(); track shop.shopId) {
+            <option [value]="shop.shopId">{{ shop.shopName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="employee">Employee</label>
+        <select 
+          id="employee" 
+          [ngModel]="selectedEmployeeId()" 
+          (ngModelChange)="selectedEmployeeId.set($event); onFilterChange()"
+          class="form-control">
+          <option value="">All Employees</option>
+          @for (employee of employees(); track employee.employeeId) {
+            <option [value]="employee.employeeId">
+              {{ employee.firstName }} {{ employee.lastName }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="month">Month</label>
+        <select 
+          id="month" 
+          [ngModel]="selectedMonth()" 
+          (ngModelChange)="selectedMonth.set($event); onFilterChange()"
+          class="form-control">
+          <option value="">All Months</option>
+          @for (month of getMonths(); track month.value) {
+            <option [value]="month.value">{{ month.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading payrolls...</div>
+  } @else if (payrolls().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">💰</div>
+      <h3>No payroll records yet</h3>
+      <p>Generate your first payroll to get started</p>
+      <button class="btn btn-primary" [routerLink]="['/payroll/add']" [queryParams]="{shopId: selectedShopId()}">
+        Generate Your First Payroll
+      </button>
+    </div>
+  } @else {
+    <div class="payroll-table-container">
+      <table class="payroll-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Employee</th>
+            <th>Basic Salary</th>
+            <th>Allowances</th>
+            <th>Deductions</th>
+            <th>Gross Salary</th>
+            <th>Net Salary</th>
+            <th>Working Days</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payroll of payrolls(); track payroll.id) {
+            <tr>
+              <td>{{ payroll.salaryMonth | date:'MMMM yyyy' }}</td>
+              <td>
+                <div class="employee-name">
+                  <strong>{{ getEmployeeName(payroll) }}</strong>
+                </div>
+              </td>
+              <td>₹{{ payroll.basicSalary | number:'1.2-2' }}</td>
+              <td>
+                <small>
+                  HRA: ₹{{ payroll.hra || 0 }}<br>
+                  Medical: ₹{{ payroll.medicalAllowance || 0 }}<br>
+                  Transport: ₹{{ payroll.transportAllowance || 0 }}
+                </small>
+              </td>
+              <td>
+                <small>
+                  PF: ₹{{ payroll.pfDeduction || 0 }}<br>
+                  Tax: ₹{{ payroll.taxDeduction || 0 }}<br>
+                  Other: ₹{{ payroll.otherDeductions || 0 }}
+                </small>
+              </td>
+              <td>₹{{ payroll.grossSalary | number:'1.2-2' }}</td>
+              <td><strong>₹{{ payroll.netSalary | number:'1.2-2' }}</strong></td>
+              <td>{{ payroll.workingDays }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(payroll.paymentStatus)">
+                  {{ payroll.paymentStatus }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-outline" [routerLink]="['/payroll', payroll.id]" [queryParams]="{shopId: selectedShopId()}">
+                    View
+                  </button>
+                  @if (payroll.paymentStatus === 'Pending') {
+                    <button class="btn btn-sm btn-success" [routerLink]="['/payroll', payroll.id, 'pay']" [queryParams]="{shopId: selectedShopId()}">
+                      Mark Paid
+                    </button>
+                  }
+                  <button class="btn btn-sm btn-danger" (click)="deletePayroll(payroll)">
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)">
+          Previous
+        </button>
+        
+        <div class="page-info">
+          Page {{ currentPage() }} of {{ totalPages() }}
+          <span class="total-items">({{ totalItems() }} items)</span>
+        </div>
+        
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    }
+  }
+
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+</div>
+

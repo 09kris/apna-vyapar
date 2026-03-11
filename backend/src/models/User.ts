@@ -15,6 +15,11 @@ interface UserAttributes {
   emailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpiresAt?: Date;
+  phoneVerified?: boolean;
+  phoneVerificationToken?: string;
+  phoneVerificationExpiresAt?: Date;
+  otpAttempts?: number;
+  otpLockedUntil?: Date;
   passwordResetToken?: string;
   passwordResetExpiresAt?: Date;
   lastLogin?: Date;
@@ -37,6 +42,11 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public emailVerified!: boolean;
   public emailVerificationToken?: string;
   public emailVerificationExpiresAt?: Date;
+  public phoneVerified?: boolean;
+  public phoneVerificationToken?: string;
+  public phoneVerificationExpiresAt?: Date;
+  public otpAttempts?: number;
+  public otpLockedUntil?: Date;
   public passwordResetToken?: string;
   public passwordResetExpiresAt?: Date;
   public lastLogin?: Date;
@@ -102,6 +112,30 @@ User.init(
     emailVerificationExpiresAt: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    phoneVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
+    phoneVerificationToken: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    phoneVerificationExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    otpAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      comment: 'Number of failed OTP attempts for rate limiting',
+    },
+    otpLockedUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: 'Timestamp until which OTP attempts are locked after too many failures',
     },
     passwordResetToken: {
       type: DataTypes.STRING(500),

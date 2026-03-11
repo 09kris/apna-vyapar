@@ -1,0 +1,270 @@
+<div class="products-container">
+  <div class="page-header">
+    <h1 class="page-title">Products</h1>
+    <div class="header-actions">
+      @if (selectedProducts().length > 0) {
+        <button class="btn btn-info" (click)="generateReferralCode()">
+          <span>🔗</span>
+          Generate Referral Code ({{ selectedProducts().length }})
+        </button>
+      }
+      <button class="btn btn-primary" [routerLink]="['/products/add']" [queryParams]="{shopId: selectedShopId()}">
+        <span>+ Add New Product</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="shop">Shop</label>
+        <select 
+          id="shop" 
+          [ngModel]="selectedShopId()" 
+          (ngModelChange)="selectedShopId.set($event); onShopChange()"
+          class="form-control">
+          <option value="">Select Shop</option>
+          @for (shop of shops(); track shop.shopId) {
+            <option [value]="shop.shopId">{{ shop.shopName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="category">Category</label>
+        <select 
+          id="category" 
+          [ngModel]="selectedCategoryId()" 
+          (ngModelChange)="selectedCategoryId.set($event); onCategoryChange()"
+          class="form-control">
+          <option value="">All Categories</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.categoryName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group search-group">
+        <label for="search">Search</label>
+        <div class="search-input">
+          <input 
+            type="text" 
+            id="search"
+            [ngModel]="searchQuery()" 
+            (ngModelChange)="searchQuery.set($event)"
+            (keyup.enter)="onSearch()"
+            placeholder="Search products..."
+            class="form-control">
+          <button class="btn btn-search" (click)="onSearch()">
+            🔍
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading products...</div>
+  } @else if (products().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3>No products yet</h3>
+      <p>Add your first product to get started</p>
+      <button class="btn btn-primary" [routerLink]="['/products/add']" [queryParams]="{shopId: selectedShopId()}">
+        Add Your First Product
+      </button>
+    </div>
+  } @else {
+    <div class="products-table-container">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th class="checkbox-col">
+              <input 
+                type="checkbox" 
+                [checked]="allProductsSelected()"
+                (change)="toggleSelectAll()"
+                title="Select all"
+              />
+            </th>
+            <th>Image</th>
+            <th>Product Code</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Retail Price</th>
+            <th>Wholesale Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product.productId) {
+            <tr [class.inactive]="!product.isActive" [class.selected]="isProductSelected(product)">
+              <td class="checkbox-col">
+                <input 
+                  type="checkbox" 
+                  [checked]="isProductSelected(product)"
+                  (change)="toggleProductSelection(product)"
+                />
+              </td>
+              <td>
+                <div class="product-image">
+                  @if (product.imageUrl) {
+                    <img [src]="product.imageUrl" [alt]="product.productName">
+                  } @else {
+                    <span class="image-placeholder">📦</span>
+                  }
+                </div>
+              </td>
+              <td>{{ product.productCode || '-' }}</td>
+              <td>
+                <div class="product-name">
+                  <strong>{{ product.productName }}</strong>
+                  @if (product.description) {
+                    <span class="product-desc">{{ product.description | slice:0:50 }}{{ product.description.length > 50 ? '...' : '' }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ product.categoryId | slice:0:8 }}...</td>
+              <td>{{ product.brand || '-' }}</td>
+              <td>₹{{ product.retailPrice | number:'1.2-2' }}</td>
+              <td>₹{{ product.wholesalePrice | number:'1.2-2' }}</td>
+              <td>
+                <span class="stock-badge" [class.low-stock]="product.stockQuantity <= product.reorderLevel">
+                  {{ product.stockQuantity }} {{ product.unit }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class.active]="product.isActive" [class.inactive]="!product.isActive">
+                  {{ product.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-outline" [routerLink]="['/products', product.productId]" [queryParams]="{shopId: selectedShopId()}">
+                    View
+                  </button>
+                  <button class="btn btn-sm btn-outline" [routerLink]="['/products', product.productId, 'edit']" [queryParams]="{shopId: selectedShopId()}">
+                    Edit
+                  </button>
+                  <button 
+                    class="btn btn-sm" 
+                    [class.btn-success]="!product.isActive" 
+                    [class.btn-warning]="product.isActive"
+                    (click)="toggleProductStatus(product)">
+                    {{ product.isActive ? 'Deactivate' : 'Activate' }}
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)">
+          Previous
+        </button>
+        
+        <div class="page-info">
+          Page {{ currentPage() }} of {{ totalPages() }}
+          <span class="total-items">({{ totalItems() }} items)</span>
+        </div>
+        
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    }
+  }
+
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+</div>
+
+<!-- Referral Code Modal -->
+@if (showReferralModal()) {
+  <div class="modal-overlay" (click)="closeReferralModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Generate Referral Code</h2>
+        <button class="close-btn" (click)="closeReferralModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        @if (referralSuccess()) {
+          <div class="success-message">
+            {{ referralSuccess() }}
+          </div>
+        } @else {
+          <p class="selected-info">
+            Creating referral code for <strong>{{ selectedProducts().length }}</strong> selected products
+          </p>
+
+          <div class="selected-products-list">
+            @for (product of selectedProducts().slice(0, 5); track product.productId) {
+              <div class="selected-product-item">
+                {{ product.productName }}
+              </div>
+            }
+            @if (selectedProducts().length > 5) {
+              <div class="more-products">+{{ selectedProducts().length - 5 }} more products</div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Referral Code Name *</label>
+            <input
+              type="text"
+              [ngModel]="referralName()"
+              (ngModelChange)="referralName.set($event)"
+              placeholder="e.g., Summer Collection 2024"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Description (Optional)</label>
+            <textarea
+              [ngModel]="referralDescription()"
+              (ngModelChange)="referralDescription.set($event)"
+              placeholder="Describe what this referral code is for"
+              class="form-control"
+              rows="2"
+            ></textarea>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeReferralModal()">Cancel</button>
+        <button
+          class="btn-primary"
+          (click)="createReferralCode()"
+          [disabled]="creatingReferral() || !referralName().trim()"
+        >
+          @if (creatingReferral()) {
+            <span class="spinner-small"></span>
+          }
+          Create Referral Code
+        </button>
+      </div>
+    </div>
+  </div>
+}

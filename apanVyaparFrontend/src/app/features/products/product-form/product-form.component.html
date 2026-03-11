@@ -1,0 +1,377 @@
+ <div class="product-form-container">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h1>
+    <button class="btn btn-outline" (click)="cancel()">
+      ← Back to Products
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <form class="product-form" (ngSubmit)="saveProduct()">
+      
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shop">Shop <span class="required">*</span></label>
+            <select 
+              id="shop" 
+              [ngModel]="shopId()" 
+              (ngModelChange)="shopId.set($event); onShopChange()"
+              name="shopId"
+              class="form-control">
+              <option value="">Select Shop</option>
+              @for (shop of shops(); track shop.shopId) {
+                <option [value]="shop.shopId">{{ shop.shopName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category <span class="required">*</span></label>
+            <select 
+              id="category" 
+              [(ngModel)]="product().categoryId" 
+              name="categoryId"
+              class="form-control">
+              <option value="">Select Category</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.categoryName }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productName">Product Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="productName" 
+              [(ngModel)]="product().productName" 
+              name="productName"
+              class="form-control"
+              placeholder="Enter product name">
+          </div>
+
+          <div class="form-group">
+            <label for="productCode">Product Code</label>
+            <input 
+              type="text" 
+              id="productCode" 
+              [(ngModel)]="product().productCode" 
+              name="productCode"
+              class="form-control"
+              placeholder="Enter product code">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea 
+            id="description" 
+            [(ngModel)]="product().description" 
+            name="description"
+            class="form-control"
+            rows="3"
+            placeholder="Enter product description"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="brand">Brand</label>
+            <input 
+              type="text" 
+              id="brand" 
+              [(ngModel)]="product().brand" 
+              name="brand"
+              class="form-control"
+              placeholder="Enter brand name">
+          </div>
+
+          <div class="form-group">
+            <label for="manufacturer">Manufacturer</label>
+            <input 
+              type="text" 
+              id="manufacturer" 
+              [(ngModel)]="product().manufacturer" 
+              name="manufacturer"
+              class="form-control"
+              placeholder="Enter manufacturer name">
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="form-section">
+        <h3 class="section-title">Pricing</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="retailPrice">Retail Price <span class="required">*</span></label>
+            <input 
+              type="number" 
+              id="retailPrice" 
+              [(ngModel)]="product().retailPrice" 
+              name="retailPrice"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="wholesalePrice">Wholesale Price <span class="required">*</span></label>
+            <input 
+              type="number" 
+              id="wholesalePrice" 
+              [(ngModel)]="product().wholesalePrice" 
+              name="wholesalePrice"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="costPrice">Cost Price</label>
+            <input 
+              type="number" 
+              id="costPrice" 
+              [(ngModel)]="product().costPrice" 
+              name="costPrice"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="mrp">MRP</label>
+            <input 
+              type="number" 
+              id="mrp" 
+              [(ngModel)]="product().mrp" 
+              name="mrp"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="discountPercentage">Discount (%)</label>
+            <input 
+              type="number" 
+              id="discountPercentage" 
+              [(ngModel)]="product().discountPercentage" 
+              name="discountPercentage"
+              class="form-control"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="taxPercentage">Tax (%)</label>
+            <input 
+              type="number" 
+              id="taxPercentage" 
+              [(ngModel)]="product().taxPercentage" 
+              name="taxPercentage"
+              class="form-control"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock & Inventory -->
+      <div class="form-section">
+        <h3 class="section-title">Stock & Inventory</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="stockQuantity">Stock Quantity</label>
+            <input 
+              type="number" 
+              id="stockQuantity" 
+              [(ngModel)]="product().stockQuantity" 
+              name="stockQuantity"
+              class="form-control"
+              min="0"
+              placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="unit">Unit <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="unit" 
+              [(ngModel)]="product().unit" 
+              name="unit"
+              class="form-control"
+              placeholder="e.g., piece, kg, liter">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reorderLevel">Reorder Level</label>
+            <input 
+              type="number" 
+              id="reorderLevel" 
+              [(ngModel)]="product().reorderLevel" 
+              name="reorderLevel"
+              class="form-control"
+              min="0"
+              placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="maxStockLevel">Max Stock Level</label>
+            <input 
+              type="number" 
+              id="maxStockLevel" 
+              [(ngModel)]="product().maxStockLevel" 
+              name="maxStockLevel"
+              class="form-control"
+              min="0"
+              placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Information -->
+      <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="weight">Weight</label>
+            <input 
+              type="number" 
+              id="weight" 
+              [(ngModel)]="product().weight" 
+              name="weight"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="dimensions">Dimensions</label>
+            <input 
+              type="text" 
+              id="dimensions" 
+              [(ngModel)]="product().dimensions" 
+              name="dimensions"
+              class="form-control"
+              placeholder="L x W x H">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="warrantyMonths">Warranty (Months)</label>
+            <input 
+              type="number" 
+              id="warrantyMonths" 
+              [(ngModel)]="product().warrantyMonths" 
+              name="warrantyMonths"
+              class="form-control"
+              min="0"
+              placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="returnDays">Return Days</label>
+            <input 
+              type="number" 
+              id="returnDays" 
+              [(ngModel)]="product().returnDays" 
+              name="returnDays"
+              class="form-control"
+              min="0"
+              placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date</label>
+            <input 
+              type="date" 
+              id="expiryDate" 
+              [(ngModel)]="product().expiryDate" 
+              name="expiryDate"
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="batchNumber">Batch Number</label>
+            <input 
+              type="text" 
+              id="batchNumber" 
+              [(ngModel)]="product().batchNumber" 
+              name="batchNumber"
+              class="form-control"
+              placeholder="Enter batch number">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="imageUrl">Image URL</label>
+          <input 
+            type="text" 
+            id="imageUrl" 
+            [(ngModel)]="product().imageUrl" 
+            name="imageUrl"
+            class="form-control"
+            placeholder="Enter image URL">
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="product().isFeatured" 
+              name="isFeatured">
+            <span>Mark as Featured Product</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      @if (error()) {
+        <div class="error-message">{{ error() }}</div>
+      }
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          @if (saving()) {
+            Saving...
+          } @else {
+            {{ isEditMode() ? 'Update Product' : 'Create Product' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

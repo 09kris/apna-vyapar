@@ -1,0 +1,110 @@
+<div class="category-form-container">
+  <div class="page-header">
+    <button (click)="goBack()" class="btn btn-secondary back-btn">
+      &larr; Back
+    </button>
+    <h1>{{ isEditMode() ? 'Edit Category' : 'Add Category' }}</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    Loading...
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading()" class="form-container">
+    <!-- Error Message -->
+    <div *ngIf="error()" class="error-message">
+      {{ error() }}
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage()" class="success-message">
+      {{ successMessage() }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Shop Selection (only in add mode) -->
+      <div *ngIf="!isEditMode()" class="form-group">
+        <label for="shopSelect">Shop *</label>
+        <select 
+          id="shopSelect" 
+          class="form-control"
+          [(ngModel)]="shopId"
+          name="shopId"
+          (ngModelChange)="onShopChange()"
+          required>
+          <option value="" disabled>Select a shop</option>
+          <option *ngFor="let shop of shops()" [value]="shop.shopId">
+            {{ shop.shopName }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Shop Display (in edit mode) -->
+      <div *ngIf="isEditMode()" class="form-group">
+        <label>Shop</label>
+        <div class="form-value">
+          {{ shopName() }}
+        </div>
+      </div>
+
+      <!-- Category Name -->
+      <div class="form-group">
+        <label for="categoryName">Category Name *</label>
+        <input 
+          type="text" 
+          id="categoryName" 
+          class="form-control"
+          [(ngModel)]="categoryName"
+          name="categoryName"
+          placeholder="Enter category name"
+          required
+          maxlength="100">
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description" 
+          class="form-control"
+          [(ngModel)]="description"
+          name="description"
+          placeholder="Enter category description"
+          rows="4"></textarea>
+      </div>
+
+      <!-- Sort Order -->
+      <div class="form-group">
+        <label for="sortOrder">Sort Order</label>
+        <input 
+          type="number" 
+          id="sortOrder" 
+          class="form-control"
+          [(ngModel)]="sortOrder"
+          name="sortOrder"
+          min="0"
+          placeholder="0">
+        <small class="help-text">Categories will be sorted by this order (lower numbers appear first)</small>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          (click)="goBack()" 
+          class="btn btn-secondary"
+          [disabled]="saving()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="saving()">
+          {{ saving() ? 'Saving...' : (isEditMode() ? 'Update Category' : 'Create Category') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

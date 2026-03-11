@@ -1,0 +1,94 @@
+<div class="categories-container">
+  <div class="page-header">
+    <h1>Categories</h1>
+    <a [routerLink]="['/categories/add']" [queryParams]="{shopId: selectedShopId()}" class="btn btn-primary">
+      <i class="icon">+</i> Add Category
+    </a>
+  </div>
+
+  <!-- Shop Filter -->
+  <div class="filter-section">
+    <div class="form-group">
+      <label for="shopSelect">Select Shop</label>
+      <select 
+        id="shopSelect" 
+        class="form-control"
+        [ngModel]="selectedShopId()"
+        (ngModelChange)="selectedShopId.set($event); onShopChange()">
+        <option value="" disabled>Select a shop</option>
+        <option *ngFor="let shop of shops()" [value]="shop.shopId">
+          {{ shop.shopName }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error()" class="error-message">
+    {{ error() }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    Loading categories...
+  </div>
+
+  <!-- Categories Table -->
+  <div *ngIf="!loading() && categories().length > 0" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Sort Order</th>
+          <th>Category Name</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of categories()">
+          <td>{{ category.sortOrder }}</td>
+          <td>
+            <strong>{{ category.categoryName }}</strong>
+          </td>
+          <td>{{ category.description || '-' }}</td>
+          <td>
+            <span [class]="'status-badge ' + (category.isActive ? 'active' : 'inactive')">
+              {{ category.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>{{ category.createdAt | date:'mediumDate' }}</td>
+          <td class="actions">
+            <a [routerLink]="['/categories', category.id]" [queryParams]="{shopId: selectedShopId()}" 
+               class="btn btn-sm btn-secondary" title="Edit">
+              Edit
+            </a>
+            <button 
+              (click)="toggleCategoryStatus(category)" 
+              class="btn btn-sm"
+              [class.btn-success]="!category.isActive"
+              [class.btn-warning]="category.isActive"
+              title="{{ category.isActive ? 'Deactivate' : 'Activate' }}">
+              {{ category.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+            <button 
+              (click)="deleteCategory(category)" 
+              class="btn btn-sm btn-danger"
+              title="Delete">
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && categories().length === 0" class="empty-state">
+    <p>No categories found for this shop.</p>
+    <a [routerLink]="['/categories/add']" [queryParams]="{shopId: selectedShopId()}" class="btn btn-primary">
+      Add Your First Category
+    </a>
+  </div>
+</div>

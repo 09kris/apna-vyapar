@@ -24,6 +24,40 @@ const enablePublicView = AsyncHandler(async (req: Request, res: Response) => {
   );
 });
 
+// Disable public view for shop
+const disablePublicView = AsyncHandler(async (req: Request, res: Response) => {
+  const { shopId } = req.body;
+
+  const shop = await Shop.findByPk(shopId);
+  if (!shop) {
+    throw new ApiError(404, 'Shop not found');
+  }
+
+  await shop.update({ publicView: false });
+
+  res.status(200).json(
+    new ApiResponse(200, shop, 'Public view disabled')
+  );
+});
+
+// Get shop public view status
+const getShopPublicViewStatus = AsyncHandler(async (req: Request, res: Response) => {
+  const { shopId } = req.query;
+
+  if (!shopId) {
+    throw new ApiError(400, 'Shop ID is required');
+  }
+
+  const shop = await Shop.findByPk(shopId as string);
+  if (!shop) {
+    throw new ApiError(404, 'Shop not found');
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, { publicView: shop.publicView }, 'Public view status fetched')
+  );
+});
+
 // Get public shops
 const getPublicShops = AsyncHandler(async (req: Request, res: Response) => {
   const shops = await Shop.findAll({
@@ -141,9 +175,49 @@ const getAllPublicProducts = AsyncHandler(async (req: Request, res: Response) =>
   );
 });
 
+// Get public catalog for a specific shop (shop + products + categories)
+const getPublicCatalog = AsyncHandler(async (req: Request, res: Response) => {
+  const { shopId } = req.params;
+
+  if (!shopId) {
+    throw new ApiError(400, 'Shop ID is required');
+  }
+
+  // Check if shop exists and is public
+  const shop = await Shop.findOne({
+    where: { shopId, publicView: true, isActive: true }
+  });
+
+  if (!shop) {
+    throw new ApiError(404, 'Shop not found or not public');
+  }
+
+  // Get products for this shop
+  const products = await Product.findAll({
+    where: { shopId, isActive: true },
+    include: [
+      { model: Category, as: 'category', attributes: ['id', 'categoryName'] }
+    ],
+    order: [['productName', 'ASC']]
+  });
+
+  // Get categories for this shop
+  const categories = await Category.findAll({
+    where: { shopId, isActive: true },
+    order: [['categoryName', 'ASC']]
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, { shop, products, categories }, 'Public catalog fetched')
+  );
+});
+
 export {
   enablePublicView,
+  disablePublicView,
+  getShopPublicViewStatus,
   getPublicShops,
   getPublicProducts,
-  getAllPublicProducts
+  getAllPublicProducts,
+  getPublicCatalog
 };

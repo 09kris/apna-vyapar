@@ -1,0 +1,256 @@
+<div class="inventory-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Inventory Management</h1>
+    <div class="shop-selector">
+      <label for="shop">Select Shop:</label>
+      <select 
+        id="shop" 
+        [value]="selectedShopId()" 
+        (change)="onShopChange()">
+        @for (shop of shops(); track shop.shopId) {
+          <option [value]="shop.shopId">{{ shop.shopName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">{{ successMessage() }}</div>
+  }
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  <!-- Summary Cards -->
+  @if (summary()) {
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="card-icon total-products">
+          <i class="fas fa-box"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ summary()?.totalProducts || 0 }}</h3>
+          <p>Total Products</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon stock-value">
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ formatCurrency(summary()?.totalStockValue || 0) }}</h3>
+          <p>Stock Value (Cost)</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon retail-value">
+          <i class="fas fa-tags"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ formatCurrency(summary()?.totalRetailValue || 0) }}</h3>
+          <p>Retail Value</p>
+        </div>
+      </div>
+      
+      <div class="summary-card warning">
+        <div class="card-icon low-stock">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ summary()?.lowStockCount || 0 }}</h3>
+          <p>Low Stock</p>
+        </div>
+      </div>
+      
+      <div class="summary-card danger">
+        <div class="card-icon out-of-stock">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ summary()?.outOfStockCount || 0 }}</h3>
+          <p>Out of Stock</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="card-icon transactions">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ summary()?.recentTransactions || 0 }}</h3>
+          <p>Recent Transactions</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Low Stock Alert Section -->
+  @if (lowStockProducts().length > 0) {
+    <div class="low-stock-section">
+      <h2><i class="fas fa-exclamation-triangle"></i> Low Stock Alerts</h2>
+      <div class="low-stock-grid">
+        @for (product of lowStockProducts(); track product.productId) {
+          <div class="low-stock-card">
+            <div class="product-info">
+              <h4>{{ product.productName }}</h4>
+              <p class="product-code">{{ product.productCode }}</p>
+            </div>
+            <div class="stock-info">
+              <div class="current-stock">
+                <span class="label">Current:</span>
+                <span class="value danger">{{ product.stockQuantity }} {{ product.unit }}</span>
+              </div>
+              <div class="reorder-level">
+                <span class="label">Reorder at:</span>
+                <span class="value">{{ product.reorderLevel }} {{ product.unit }}</span>
+              </div>
+            </div>
+            <button class="btn-adjust" (click)="openStockModal(product)">
+              <i class="fas fa-plus-minus"></i> Adjust Stock
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Inventory Transactions Section -->
+  <div class="transactions-section">
+    <div class="section-header">
+      <h2>Inventory Transactions</h2>
+      <div class="filters">
+        <select 
+          [value]="selectedProductId()" 
+          (change)="selectedProductId.set($any($event.target).value)">
+          <option value="">All Products</option>
+          @for (product of products(); track product.id) {
+            <option [value]="product.id">{{ product.productName }}</option>
+          }
+        </select>
+        
+        <select 
+          [value]="selectedType()" 
+          (change)="selectedType.set($any($event.target).value)">
+          <option value="">All Types</option>
+          @for (type of transactionTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading transactions...</div>
+    } @else {
+      <div class="transactions-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Product</th>
+              <th>Type</th>
+              <th>Quantity Change</th>
+              <th>Previous Stock</th>
+              <th>New Stock</th>
+              <th>Unit Cost</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (transaction of getFilteredTransactions(); track transaction.id) {
+              <tr>
+                <td>{{ formatDate(transaction.createdAt) }}</td>
+                <td>{{ getProductName(transaction.productId) }}</td>
+                <td>
+                  <span class="type-badge" [class]="getTransactionTypeClass(transaction.transactionType)">
+                    {{ getTransactionTypeLabel(transaction.transactionType) }}
+                  </span>
+                </td>
+                <td [class]="transaction.quantityChange > 0 ? 'positive' : 'negative'">
+                  {{ transaction.quantityChange > 0 ? '+' : '' }}{{ transaction.quantityChange }}
+                </td>
+                <td>{{ transaction.previousStock }}</td>
+                <td>{{ transaction.newStock }}</td>
+                <td>{{ transaction.unitCost ? formatCurrency(transaction.unitCost) : '-' }}</td>
+                <td>{{ transaction.remarks || '-' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="no-data">No transactions found</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Stock Adjustment Modal -->
+@if (showStockModal()) {
+  <div class="modal-overlay" (click)="closeStockModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Adjust Stock</h3>
+        <button class="close-btn" (click)="closeStockModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        @if (selectedProduct()) {
+          <div class="product-details">
+            <h4>{{ selectedProduct().productName }}</h4>
+            <p>Current Stock: {{ selectedProduct().stockQuantity }} {{ selectedProduct().unit }}</p>
+          </div>
+          
+          <form (ngSubmit)="submitStockAdjustment()">
+            <div class="form-group">
+              <label>Transaction Type</label>
+              <select [(ngModel)]="stockForm.transactionType" name="transactionType">
+                @for (type of transactionTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Quantity Change</label>
+              <input 
+                type="number" 
+                [(ngModel)]="stockForm.quantityChange" 
+                name="quantityChange"
+                placeholder="Enter positive to add, negative to remove"
+                required>
+              <small>Use positive numbers to add stock, negative to remove</small>
+            </div>
+            
+            <div class="form-group">
+              <label>Unit Cost (Optional)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="stockForm.unitCost" 
+                name="unitCost"
+                placeholder="Cost per unit">
+            </div>
+            
+            <div class="form-group">
+              <label>Remarks</label>
+              <textarea 
+                [(ngModel)]="stockForm.remarks" 
+                name="remarks"
+                placeholder="Add any notes about this adjustment"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" (click)="closeStockModal()">Cancel</button>
+              <button type="submit" class="btn-submit">Submit Adjustment</button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  </div>
+}

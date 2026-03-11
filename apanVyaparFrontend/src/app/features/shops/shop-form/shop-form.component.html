@@ -1,0 +1,318 @@
+<div class="shop-form-container">
+  <div class="page-header">
+    <button class="back-btn" routerLink="/shops">
+      <span>←</span> Back to Shops
+    </button>
+    <h1 class="page-title">{{ isEditMode() ? 'Edit Shop' : 'Add New Shop' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <form [formGroup]="shopForm" (ngSubmit)="onSubmit()" class="shop-form">
+      
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shopName">Shop Name *</label>
+            <input 
+              type="text" 
+              id="shopName" 
+              formControlName="shopName" 
+              placeholder="Enter shop name"
+              [class.error]="isFieldInvalid('shopName')"
+            >
+            @if (isFieldInvalid('shopName')) {
+              <span class="field-error">Shop name is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="shopType">Shop Type *</label>
+            <select 
+              id="shopType" 
+              formControlName="shopType"
+              [class.error]="isFieldInvalid('shopType')"
+            >
+              <option value="">Select shop type</option>
+              <option value="RETAIL">Retail</option>
+              <option value="WHOLESALE">Wholesale</option>
+              <option value="ECOMMERCE">E-Commerce</option>
+              <option value="FRANCHISE">Franchise</option>
+              <option value="OTHER">Other</option>
+            </select>
+            @if (isFieldInvalid('shopType')) {
+              <span class="field-error">Shop type is required</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="shopDescription">Shop Description</label>
+          <textarea 
+            id="shopDescription" 
+            formControlName="shopDescription" 
+            rows="3"
+            placeholder="Describe your shop"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="shopCategory">Shop Category</label>
+          <input 
+            type="text" 
+            id="shopCategory" 
+            formControlName="shopCategory" 
+            placeholder="e.g., Electronics, Clothing, Food"
+          >
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="form-section">
+        <h3 class="section-title">Contact Information</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              formControlName="phoneNumber" 
+              placeholder="Enter phone number"
+              [class.error]="isFieldInvalid('phoneNumber')"
+            >
+            @if (isFieldInvalid('phoneNumber')) {
+              <span class="field-error">Phone number is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              placeholder="shop@example.com"
+              [class.error]="isFieldInvalid('email')"
+            >
+            @if (isFieldInvalid('email')) {
+              <span class="field-error">Valid email is required</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="website">Website</label>
+          <input 
+            type="url" 
+            id="website" 
+            formControlName="website" 
+            placeholder="https://www.example.com"
+          >
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-section">
+        <h3 class="section-title">Address</h3>
+        
+        <div class="form-group">
+          <label for="address">Street Address *</label>
+          <input 
+            type="text" 
+            id="address" 
+            formControlName="address" 
+            placeholder="Enter street address"
+            [class.error]="isFieldInvalid('address')"
+          >
+          @if (isFieldInvalid('address')) {
+            <span class="field-error">Address is required</span>
+          }
+        </div>
+
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label for="city">City *</label>
+            <input 
+              type="text" 
+              id="city" 
+              formControlName="city" 
+              placeholder="City"
+              [class.error]="isFieldInvalid('city')"
+            >
+            @if (isFieldInvalid('city')) {
+              <span class="field-error">City is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="state">State *</label>
+            <input 
+              type="text" 
+              id="state" 
+              formControlName="state" 
+              placeholder="State"
+              [class.error]="isFieldInvalid('state')"
+            >
+            @if (isFieldInvalid('state')) {
+              <span class="field-error">State is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="zipCode">Zip Code *</label>
+            <input 
+              type="text" 
+              id="zipCode" 
+              formControlName="zipCode" 
+              placeholder="Zip Code"
+              [class.error]="isFieldInvalid('zipCode')"
+            >
+            @if (isFieldInvalid('zipCode')) {
+              <span class="field-error">Zip code is required</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country *</label>
+          <input 
+            type="text" 
+            id="country" 
+            formControlName="country" 
+            placeholder="Country"
+            [class.error]="isFieldInvalid('country')"
+          >
+          @if (isFieldInvalid('country')) {
+            <span class="field-error">Country is required</span>
+          }
+        </div>
+      </div>
+
+      <!-- Business Hours -->
+      <div class="form-section">
+        <h3 class="section-title">Business Hours</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="businessHoursStart">Opening Time</label>
+            <input 
+              type="time" 
+              id="businessHoursStart" 
+              formControlName="businessHoursStart" 
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="businessHoursEnd">Closing Time</label>
+            <input 
+              type="time" 
+              id="businessHoursEnd" 
+              formControlName="businessHoursEnd" 
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="establishedYear">Established Year</label>
+            <input 
+              type="number" 
+              id="establishedYear" 
+              formControlName="establishedYear" 
+              placeholder="e.g., 2020"
+              min="1800"
+              max="2100"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="form-section">
+        <h3 class="section-title">Bank Details (Optional)</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bankAccountHolderName">Account Holder Name</label>
+            <input 
+              type="text" 
+              id="bankAccountHolderName" 
+              formControlName="bankAccountHolderName" 
+              placeholder="Account holder name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="bankAccountNumber">Account Number</label>
+            <input 
+              type="text" 
+              id="bankAccountNumber" 
+              formControlName="bankAccountNumber" 
+              placeholder="Account number"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bankName">Bank Name</label>
+            <input 
+              type="text" 
+              id="bankName" 
+              formControlName="bankName" 
+              placeholder="Bank name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="bankBranchCode">Branch Code</label>
+            <input 
+              type="text" 
+              id="bankBranchCode" 
+              formControlName="bankBranchCode" 
+              placeholder="Branch code"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bankIfscCode">IFSC Code</label>
+            <input 
+              type="text" 
+              id="bankIfscCode" 
+              formControlName="bankIfscCode" 
+              placeholder="IFSC code"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="upiId">UPI ID</label>
+            <input 
+              type="text" 
+              id="upiId" 
+              formControlName="upiId" 
+              placeholder="e.g., shop@upi"
+            >
+          </div>
+        </div>
+      </div>
+
+      @if (error()) {
+        <div class="error-message">{{ error() }}</div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" routerLink="/shops">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+          {{ submitting() ? 'Saving...' : (isEditMode() ? 'Update Shop' : 'Create Shop') }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

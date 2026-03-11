@@ -6,7 +6,7 @@ import AsyncHandler from '../utils/AsyncHandler';
 
 // Generate referral code for shop
 const generateReferralCode = AsyncHandler(async (req: Request, res: Response) => {
-  const { shopId } = req.params;
+  const { shopId } = req.params as { shopId: string };
 
   const shop = await Shop.findByPk(shopId);
   if (!shop) {
@@ -14,7 +14,7 @@ const generateReferralCode = AsyncHandler(async (req: Request, res: Response) =>
   }
 
   // Generate unique referral code
-  let referralCode: string;
+  let referralCode = '';
   let isUnique = false;
   
   while (!isUnique) {
@@ -99,7 +99,7 @@ const getCatalogProducts = AsyncHandler(async (req: Request, res: Response) => {
 
   // Find shop by referral code
   const shop = await Shop.findOne({ 
-    where: { referralCode, isActive: true }
+    where: { referralCode: referralCode as string, isActive: true }
   });
 
   if (!shop) {
@@ -169,7 +169,7 @@ const getCatalogAnalytics = AsyncHandler(async (req: Request, res: Response) => 
   const { shopId } = req.params;
   const { startDate, endDate } = req.query;
 
-  const whereClause: any = { shopId };
+  const whereClause: any = { shopId: shopId as string };
   
   if (startDate && endDate) {
     whereClause.accessedAt = {

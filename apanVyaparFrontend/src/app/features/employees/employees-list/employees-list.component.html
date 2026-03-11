@@ -1,0 +1,160 @@
+<div class="employees-container">
+  <div class="page-header">
+    <h1 class="page-title">Employees</h1>
+    <button class="btn btn-primary" [routerLink]="['/employees/add']" [queryParams]="{shopId: selectedShopId()}">
+      <span>+ Add New Employee</span>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="shop">Shop</label>
+        <select 
+          id="shop" 
+          [ngModel]="selectedShopId()" 
+          (ngModelChange)="selectedShopId.set($event); onShopChange()"
+          class="form-control">
+          <option value="">Select Shop</option>
+          @for (shop of shops(); track shop.shopId) {
+            <option [value]="shop.shopId">{{ shop.shopName }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group search-group">
+        <label for="search">Search</label>
+        <div class="search-input">
+          <input 
+            type="text" 
+            id="search"
+            [ngModel]="searchQuery()" 
+            (ngModelChange)="searchQuery.set($event)"
+            (keyup.enter)="onSearch()"
+            placeholder="Search employees..."
+            class="form-control">
+          <button class="btn btn-search" (click)="onSearch()">
+            🔍
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading employees...</div>
+  } @else if (employees().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">👤</div>
+      <h3>No employees yet</h3>
+      <p>Add your first employee to get started</p>
+      <button class="btn btn-primary" [routerLink]="['/employees/add']" [queryParams]="{shopId: selectedShopId()}">
+        Add Your First Employee
+      </button>
+    </div>
+  } @else {
+    <div class="employees-table-container">
+      <table class="employees-table">
+        <thead>
+          <tr>
+            <th>Employee Code</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Employee Type</th>
+            <th>Department</th>
+            <th>Employment Type</th>
+            <th>Salary</th>
+            <th>Joining Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (employee of employees(); track employee.id) {
+            <tr [class.inactive]="!employee.isActive">
+              <td>{{ employee.employeeCode || '-' }}</td>
+              <td>
+                <div class="employee-name">
+                  <strong>{{ employee.user?.fullName || 'N/A' }}</strong>
+                  @if (employee.user?.email) {
+                    <span class="employee-email">{{ employee.user?.email }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ employee.designation || '-' }}</td>
+              <td>
+                <span class="type-badge" [class.worker]="employee.employeeType === 'Worker'" [class.manager]="employee.employeeType === 'Manager'">
+                  {{ employee.employeeType || 'Worker' }}
+                </span>
+              </td>
+              <td>{{ employee.department || '-' }}</td>
+              <td>
+                <span class="type-badge" [class.full-time]="employee.employmentType === 'Full-time'" 
+                      [class.part-time]="employee.employmentType === 'Part-time'"
+                      [class.contract]="employee.employmentType === 'Contract'">
+                  {{ employee.employmentType || 'N/A' }}
+                </span>
+              </td>
+              <td>₹{{ employee.salary | number:'1.2-2' }}</td>
+              <td>{{ employee.joiningDate | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="status-badge" [class.active]="employee.isActive" [class.inactive]="!employee.isActive">
+                  {{ employee.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-outline" [routerLink]="['/employees', employee.employeeId || employee.id]" [queryParams]="{shopId: selectedShopId()}">
+                    View
+                  </button>
+                  <button class="btn btn-sm btn-outline" [routerLink]="['/employees', employee.employeeId || employee.id, 'edit']" [queryParams]="{shopId: selectedShopId()}">
+                    Edit
+                  </button>
+                  <button 
+                    class="btn btn-sm" 
+                    [class.btn-success]="!employee.isActive" 
+                    [class.btn-warning]="employee.isActive"
+                    (click)="toggleEmployeeStatus(employee)">
+                    {{ employee.isActive ? 'Deactivate' : 'Activate' }}
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteEmployee(employee)">
+                    Terminate
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === 1"
+          (click)="goToPage(currentPage() - 1)">
+          Previous
+        </button>
+        
+        <div class="page-info">
+          Page {{ currentPage() }} of {{ totalPages() }}
+          <span class="total-items">({{ totalItems() }} items)</span>
+        </div>
+        
+        <button 
+          class="btn btn-sm btn-outline" 
+          [disabled]="currentPage() === totalPages()"
+          (click)="goToPage(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    }
+  }
+
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+</div>

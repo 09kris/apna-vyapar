@@ -3,15 +3,29 @@ import sequelize from '../config/database';
 import { v4 as uuidv4 } from 'uuid';
 
 export type OrderType = 'RETAIL' | 'WHOLESALE';
+// =====================================================
+// ORDER STATUSES - Extended for comprehensive lifecycle
+// =====================================================
 export type OrderStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'PARTIALLY_SHIPPED'
-  | 'SHIPPED'
-  | 'DELIVERED'
-  | 'CANCELLED';
+  | 'DRAFT'           // Order created but not confirmed
+  | 'PENDING'         // Awaiting confirmation
+  | 'CONFIRMED'       // Order confirmed by seller
+  | 'PROCESSING'      // Order being prepared
+  | 'SHIPPED'         // Order shipped to customer
+  | 'DELIVERED'       // Order delivered to customer
+  | 'COMPLETED'       // Order fully completed (paid + delivered)
+  | 'CANCELLED'       // Order cancelled
+  | 'RETURNED';       // Order returned by customer
 
-export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID';
+// =====================================================
+// PAYMENT STATUSES - Extended for real-world scenarios
+// =====================================================
+export type PaymentStatus = 
+  | 'UNPAID'          // No payment received
+  | 'PARTIALLY_PAID' // Partial payment received
+  | 'PAID'            // Full payment received
+  | 'REFUNDED'        // Payment refunded
+  | 'FAILED';         // Payment failed
 export type PaymentMethod = 'CASH' | 'CARD' | 'UPI' | 'NET_BANKING' | 'CREDIT';
 
 interface OrderAttributes {
@@ -148,17 +162,20 @@ Order.init(
     },
     orderStatus: {
       type: DataTypes.ENUM(
+        'DRAFT',
         'PENDING',
         'CONFIRMED',
-        'PARTIALLY_SHIPPED',
+        'PROCESSING',
         'SHIPPED',
         'DELIVERED',
+        'COMPLETED',
         'CANCELLED',
+        'RETURNED'
       ),
       defaultValue: 'PENDING',
     },
     paymentStatus: {
-      type: DataTypes.ENUM('UNPAID', 'PARTIAL', 'PAID'),
+      type: DataTypes.ENUM('UNPAID', 'PARTIALLY_PAID', 'PAID', 'REFUNDED', 'FAILED'),
       defaultValue: 'UNPAID',
     },
     paymentMethod: {

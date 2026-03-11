@@ -1,0 +1,90 @@
+<div class="catalog-access-container">
+  <div class="page-header">
+    <h1>My Catalog Access</h1>
+    <p>Access wholesale catalogs from different shops</p>
+  </div>
+
+  <!-- Request Access Form -->
+  <div class="request-form-card">
+    <h2>Request Catalog Access</h2>
+    <p class="subtitle">Enter a referral code to get access to a shop's wholesale catalog</p>
+    
+    <div class="request-form">
+      <input 
+        type="text" 
+        placeholder="Enter referral code"
+        [value]="referralCode()"
+        (input)="referralCode.set($any($event.target).value)"
+        (keyup.enter)="requestAccess()">
+      <button 
+        class="request-btn"
+        [disabled]="requesting()"
+        (click)="requestAccess()">
+        {{ requesting() ? 'Requesting...' : 'Request Access' }}
+      </button>
+    </div>
+
+    @if (error()) {
+      <div class="message error">{{ error() }}</div>
+    }
+    @if (successMessage()) {
+      <div class="message success">{{ successMessage() }}</div>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your catalog access...</p>
+    </div>
+  } @else {
+    <!-- Access List -->
+    <div class="access-list-section">
+      <h2>My Catalog Access</h2>
+      
+      @if (catalogAccess().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🔐</span>
+          <h3>No catalog access yet</h3>
+          <p>Request access to a shop's catalog using a referral code above</p>
+        </div>
+      } @else {
+        <div class="access-grid">
+          @for (access of catalogAccess(); track access.id) {
+            <div class="access-card">
+              <div class="access-header">
+                <div class="shop-info">
+                  @if (access.shop?.shopLogo) {
+                    <img [src]="access.shop!.shopLogo" [alt]="access.shop!.shopName" class="shop-logo">
+                  } @else {
+                    <div class="shop-logo-placeholder">🏪</div>
+                  }
+                  <div class="shop-details">
+                    <h3>{{ access.shop?.shopName || 'Shop' }}</h3>
+                    <span class="referral-code">Code: {{ access.referralCode }}</span>
+                  </div>
+                </div>
+                <span class="status-badge" [class.active]="access.isActive">
+                  {{ access.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              
+              <div class="access-meta">
+                <span class="accessed-at">Access granted: {{ formatDate(access.accessedAt) }}</span>
+              </div>
+              
+              <button 
+                class="view-catalog-btn"
+                [disabled]="!access.isActive"
+                (click)="viewCatalog(access.shopId)">
+                View Catalog
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+

@@ -1,0 +1,227 @@
+<div class="employee-form-container">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode() ? 'Edit Employee' : 'Add New Employee' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <form (ngSubmit)="onSubmit()" class="employee-form">
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shop">Shop <span class="required">*</span></label>
+            <select 
+              id="shop" 
+              [ngModel]="selectedShopId()" 
+              (ngModelChange)="onShopChange($event)"
+              name="shop"
+              class="form-control"
+              [disabled]="isEditMode()">
+              <option value="">Select Shop</option>
+              @for (shop of shops(); track shop.shopId) {
+                <option [value]="shop.shopId">{{ shop.shopName }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name <span class="required">*</span></label>
+            <input type="text" id="firstName" [(ngModel)]="formData()['firstName']" name="firstName" class="form-control" placeholder="Enter first name" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name <span class="required">*</span></label>
+            <input type="text" id="lastName" [(ngModel)]="formData()['lastName']" name="lastName" class="form-control" placeholder="Enter last name" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input type="email" id="email" [(ngModel)]="formData()['email']" name="email" class="form-control" placeholder="Enter email address" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input type="text" id="phone" [(ngModel)]="formData()['phone']" name="phone" class="form-control" placeholder="Enter phone number" required>
+          </div>
+        </div>
+
+        @if (!isEditMode()) {
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password <span class="required">*</span></label>
+            <input type="password" id="password" [(ngModel)]="formData()['password']" name="password" class="form-control" placeholder="Enter password" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+            <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm password" required>
+          </div>
+        </div>
+        }
+
+        <div class="form-row">
+          @if (isFieldEnabled('employeeCode')) {
+          <div class="form-group">
+            <label for="employeeCode">Employee Code @if (isFieldRequired('employeeCode')) { <span class="required">*</span> }</label>
+            <input type="text" id="employeeCode" [(ngModel)]="formData()['employeeCode']" name="employeeCode" class="form-control" placeholder="Enter employee code">
+          </div>
+          }
+          @if (isFieldEnabled('designation')) {
+          <div class="form-group">
+            <label for="designation">Designation @if (isFieldRequired('designation')) { <span class="required">*</span> }</label>
+            <select id="designation" [(ngModel)]="formData()['designation']" name="designation" class="form-control" [required]="isFieldRequired('designation')">
+              @for (type of designationTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+          }
+        </div>
+
+        @if (isFieldEnabled('department') || isFieldEnabled('employmentType') || isFieldEnabled('employeeType')) {
+        <div class="form-row">
+          @if (isFieldEnabled('department')) {
+          <div class="form-group">
+            <label for="department">Department @if (isFieldRequired('department')) { <span class="required">*</span> }</label>
+            <input type="text" id="department" [(ngModel)]="formData()['department']" name="department" class="form-control" placeholder="Enter department">
+          </div>
+          }
+          @if (isFieldEnabled('employmentType')) {
+          <div class="form-group">
+            <label for="employmentType">Employment Type @if (isFieldRequired('employmentType')) { <span class="required">*</span> }</label>
+            <select id="employmentType" [(ngModel)]="formData()['employmentType']" name="employmentType" class="form-control">
+              @for (type of employmentTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+          }
+          @if (isFieldEnabled('employeeType')) {
+          <div class="form-group">
+            <label for="employeeType">Employee Type @if (isFieldRequired('employeeType')) { <span class="required">*</span> }</label>
+            <select id="employeeType" [(ngModel)]="formData()['employeeType']" name="employeeType" class="form-control">
+              @for (type of employeeTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+          }
+        </div>
+        }
+
+        @if (isFieldEnabled('salary') || isFieldEnabled('joiningDate')) {
+        <div class="form-row">
+          @if (isFieldEnabled('salary')) {
+          <div class="form-group">
+            <label for="salary">Salary @if (isFieldRequired('salary')) { <span class="required">*</span> }</label>
+            <input type="number" id="salary" [(ngModel)]="formData()['salary']" name="salary" class="form-control" placeholder="Enter salary" min="0" step="0.01">
+          </div>
+          }
+          @if (isFieldEnabled('joiningDate')) {
+          <div class="form-group">
+            <label for="joiningDate">Joining Date @if (isFieldRequired('joiningDate')) { <span class="required">*</span> }</label>
+            <input type="date" id="joiningDate" [(ngModel)]="formData()['joiningDate']" name="joiningDate" class="form-control">
+          </div>
+          }
+        </div>
+        }
+
+        @if (isFieldEnabled('probationEndDate') || isFieldEnabled('reportingTo')) {
+        <div class="form-row">
+          @if (isFieldEnabled('probationEndDate')) {
+          <div class="form-group">
+            <label for="probationEndDate">Probation End Date @if (isFieldRequired('probationEndDate')) { <span class="required">*</span> }</label>
+            <input type="date" id="probationEndDate" [(ngModel)]="formData()['probationEndDate']" name="probationEndDate" class="form-control">
+          </div>
+          }
+          @if (isFieldEnabled('reportingTo')) {
+          <div class="form-group">
+            <label for="reportingTo">Reporting To @if (isFieldRequired('reportingTo')) { <span class="required">*</span> }</label>
+            <input type="text" id="reportingTo" [(ngModel)]="formData()['reportingTo']" name="reportingTo" class="form-control" placeholder="Enter manager/supervisor ID">
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      @if (isFieldEnabled('aadhaarNumber') || isFieldEnabled('panNumber')) {
+      <div class="form-section">
+        <h3 class="section-title">Personal Information</h3>
+        <div class="form-row">
+          @if (isFieldEnabled('aadhaarNumber')) {
+          <div class="form-group">
+            <label for="aadhaarNumber">Aadhaar Number @if (isFieldRequired('aadhaarNumber')) { <span class="required">*</span> }</label>
+            <input type="text" id="aadhaarNumber" [(ngModel)]="formData()['aadhaarNumber']" name="aadhaarNumber" class="form-control" placeholder="Enter Aadhaar number" maxlength="12">
+          </div>
+          }
+          @if (isFieldEnabled('panNumber')) {
+          <div class="form-group">
+            <label for="panNumber">PAN Number @if (isFieldRequired('panNumber')) { <span class="required">*</span> }</label>
+            <input type="text" id="panNumber" [(ngModel)]="formData()['panNumber']" name="panNumber" class="form-control" placeholder="Enter PAN number" maxlength="10">
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @if (isFieldEnabled('bankAccount') || isFieldEnabled('bankIfsc')) {
+      <div class="form-section">
+        <h3 class="section-title">Bank Details</h3>
+        <div class="form-row">
+          @if (isFieldEnabled('bankAccount')) {
+          <div class="form-group">
+            <label for="bankAccount">Bank Account Number @if (isFieldRequired('bankAccount')) { <span class="required">*</span> }</label>
+            <input type="text" id="bankAccount" [(ngModel)]="formData()['bankAccount']" name="bankAccount" class="form-control" placeholder="Enter bank account number">
+          </div>
+          }
+          @if (isFieldEnabled('bankIfsc')) {
+          <div class="form-group">
+            <label for="bankIfsc">IFSC Code @if (isFieldRequired('bankIfsc')) { <span class="required">*</span> }</label>
+            <input type="text" id="bankIfsc" [(ngModel)]="formData()['bankIfsc']" name="bankIfsc" class="form-control" placeholder="Enter IFSC code" maxlength="11">
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @if (isFieldEnabled('emergencyContactName') || isFieldEnabled('emergencyContact')) {
+      <div class="form-section">
+        <h3 class="section-title">Emergency Contact</h3>
+        <div class="form-row">
+          @if (isFieldEnabled('emergencyContactName')) {
+          <div class="form-group">
+            <label for="emergencyContactName">Contact Person Name @if (isFieldRequired('emergencyContactName')) { <span class="required">*</span> }</label>
+            <input type="text" id="emergencyContactName" [(ngModel)]="formData()['emergencyContactName']" name="emergencyContactName" class="form-control" placeholder="Enter contact person name">
+          </div>
+          }
+          @if (isFieldEnabled('emergencyContact')) {
+          <div class="form-group">
+            <label for="emergencyContact">Contact Number @if (isFieldRequired('emergencyContact')) { <span class="required">*</span> }</label>
+            <input type="text" id="emergencyContact" [(ngModel)]="formData()['emergencyContact']" name="emergencyContact" class="form-control" placeholder="Enter emergency contact number" maxlength="15">
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @if (error()) {
+        <div class="alert alert-error">{{ error() }}</div>
+      }
+
+      @if (successMessage()) {
+        <div class="alert alert-success">{{ successMessage() }}</div>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          @if (saving()) { <span>Saving...</span> } @else { <span>{{ isEditMode() ? 'Update Employee' : 'Add Employee' }}</span> }
+        </button>
+      </div>
+    </form>
+  }
+</div>

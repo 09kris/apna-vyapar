@@ -37,7 +37,7 @@ const getDashboardOverview = AsyncHandler(async (req: Request, res: Response) =>
 
   const totalRevenue = periodOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
   const totalOrders = periodOrders.length;
-  const completedOrders = periodOrders.filter(order => order.orderStatus === 'Delivered').length;
+  const completedOrders = periodOrders.filter(order => order.orderStatus === 'DELIVERED').length;
 
   // Average order value
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -445,11 +445,117 @@ const getFinancialSummary = AsyncHandler(async (req: Request, res: Response) => 
   );
 });
 
+// Get employee analytics
+const getEmployeeAnalytics = AsyncHandler(async (req: Request, res: Response) => {
+  const { shopId } = req.params;
+
+  // Total employees
+  const totalEmployees = await Employee.count({
+    where: { shopId }
+  });
+
+  // Active/Inactive counts
+  const activeEmployees = await Employee.count({
+    where: { shopId, isActive: true }
+  });
+
+  const inactiveEmployees = await Employee.count({
+    where: { shopId, isActive: false }
+  });
+
+  // Employees by type (Worker/Manager)
+  const employeesByType = await Employee.findAll({
+    where: { shopId },
+    attributes: [
+      'employeeType',
+      [require('sequelize').fn('COUNT', require('sequelize').col('employeeId')), 'count']
+    ],
+    group: ['employeeType'],
+    raw: true,
+    subQuery: false
+  });
+
+  // Employees by employment type
+  const employeesByEmploymentType = await Employee.findAll({
+    where: { shopId },
+    attributes: [
+      'employmentType',
+      [require('sequelize').fn('COUNT', require('sequelize').col('employeeId')), 'count']
+    ],
+    group: ['employmentType'],
+    raw: true,
+    subQuery: false
+  });
+
+  // Employees by department
+  const employeesByDepartment = await Employee.findAll({
+    where: { shopId },
+    attributes: [
+      'department',
+      [require('sequelize').fn('COUNT', require('sequelize').col('employeeId')), 'count']
+    ],
+    group: ['department'],
+    having: require('sequelize').where(
+      require('sequelize').col('department'),
+      { [Op.ne]: null }
+    ),
+    raw: true,
+    subQuery: false
+  });
+
+  // Total monthly salary expense
+  const salaryStats = await Employee.findOne({
+    where: { shopId, isActive: true },
+    attributes: [
+      [require('sequelize').fn('SUM', require('sequelize').col('salary')), 'totalMonthlySalary'],
+      [require('sequelize').fn('AVG', require('sequelize').col('salary')), 'averageSalary'],
+      [require('sequelize').fn('COUNT', require('sequelize').col('employeeId')), 'employeeCount']
+    ],
+    raw: true
+  });
+
+  // Recent employees (last 5 added)
+  const recentEmployees = await Employee.findAll({
+    where: { shopId },
+    order: [['createdAt', 'DESC']],
+    limit: 5,
+    attributes: ['employeeId', 'designation', 'department', 'employmentType', 'employeeType', 'isActive', 'joiningDate', 'createdAt']
+  });
+
+  // Employees joining in current month
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const newEmployeesThisMonth = await Employee.count({
+    where: {
+      shopId,
+      createdAt: { [Op.gte]: startOfMonth }
+    }
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, {
+      totalEmployees,
+      activeEmployees,
+      inactiveEmployees,
+      employeesByType: employeesByType as any[],
+      employeesByEmploymentType: employeesByEmploymentType as any[],
+      employeesByDepartment: employeesByDepartment as any[],
+      totalMonthlySalary: (salaryStats as any)?.totalMonthlySalary || 0,
+      averageSalary: (salaryStats as any)?.averageSalary || 0,
+      recentEmployees,
+      newEmployeesThisMonth
+    }, 'Employee analytics fetched successfully')
+  );
+});
+
 export {
   getDashboardOverview,
   getSalesAnalytics,
   getProductPerformance,
   getCustomerAnalytics,
   getInventoryAnalytics,
-  getFinancialSummary
+  getFinancialSummary,
+  getEmployeeAnalytics
 };

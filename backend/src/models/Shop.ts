@@ -42,6 +42,9 @@ interface ShopAttributes {
   referenceCode?: string;
   referralCode?: string;
   publicView?: boolean;
+  // Tax details
+  gstNumber?: string;
+  panNumber?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -87,6 +90,9 @@ class Shop extends Model<ShopAttributes, ShopCreationAttributes> implements Shop
   public referenceCode?: string;
   public referralCode?: string;
   public publicView?: boolean;
+  // Tax details
+  public gstNumber?: string;
+  public panNumber?: string;
   public readonly createdAt?: Date;
   public readonly updatedAt?: Date;
 }
@@ -252,6 +258,15 @@ Shop.init(
     publicView: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    // Tax details
+    gstNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    panNumber: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
     },
   },
   {

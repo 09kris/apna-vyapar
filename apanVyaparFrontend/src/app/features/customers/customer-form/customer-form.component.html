@@ -1,0 +1,202 @@
+<div class="customer-form-container">
+  <div class="page-header">
+    <div class="header-left">
+      <a routerLink="/customers" class="back-link">← Back to Customers</a>
+      <h1 class="page-title">{{ isEditMode() ? 'Edit Customer' : 'Add Customer' }}</h1>
+      <p class="page-subtitle">{{ isEditMode() ? 'Update customer information' : 'Add a new customer to your database' }}</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="error-message">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading customer data...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <form (ngSubmit)="onSubmit()" class="customer-form">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fullName">Full Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="fullName"
+              [ngModel]="formData().fullName"
+              (ngModelChange)="updateField('fullName', $event)"
+              name="fullName"
+              placeholder="Enter full name"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input 
+              type="tel" 
+              id="phone"
+              [ngModel]="formData().phone"
+              (ngModelChange)="updateField('phone', $event)"
+              name="phone"
+              placeholder="Enter phone number"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email"
+              [ngModel]="formData().email"
+              (ngModelChange)="updateField('email', $event)"
+              name="email"
+              placeholder="Enter email address"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="customerType">Customer Type <span class="required">*</span></label>
+            <select 
+              id="customerType"
+              [ngModel]="formData().customerType"
+              (ngModelChange)="updateField('customerType', $event)"
+              name="customerType"
+              required
+            >
+              <option value="Retail">Retail</option>
+              <option value="Wholesale">Wholesale</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Information -->
+      <div class="form-section">
+        <h3 class="section-title">Company Information</h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input 
+              type="text" 
+              id="companyName"
+              [ngModel]="formData().companyName"
+              (ngModelChange)="updateField('companyName', $event)"
+              name="companyName"
+              placeholder="Enter company name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="gstNumber">GST Number</label>
+            <input 
+              type="text" 
+              id="gstNumber"
+              [ngModel]="formData().gstNumber"
+              (ngModelChange)="updateField('gstNumber', $event)"
+              name="gstNumber"
+              placeholder="Enter GST number"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="creditLimit">Credit Limit</label>
+            <div class="input-with-prefix">
+              <span class="prefix">₹</span>
+              <input 
+                type="number" 
+                id="creditLimit"
+                [ngModel]="formData().creditLimit"
+                (ngModelChange)="updateField('creditLimit', $event)"
+                name="creditLimit"
+                placeholder="0"
+                min="0"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-section">
+        <h3 class="section-title">Address Information</h3>
+        
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="address">Address</label>
+            <textarea 
+              id="address"
+              [ngModel]="formData().address"
+              (ngModelChange)="updateField('address', $event)"
+              name="address"
+              placeholder="Enter full address"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="city">City</label>
+            <input 
+              type="text" 
+              id="city"
+              [ngModel]="formData().city"
+              (ngModelChange)="updateField('city', $event)"
+              name="city"
+              placeholder="Enter city"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="state">State</label>
+            <input 
+              type="text" 
+              id="state"
+              [ngModel]="formData().state"
+              (ngModelChange)="updateField('state', $event)"
+              name="state"
+              placeholder="Enter state"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="pincode">Pincode</label>
+            <input 
+              type="text" 
+              id="pincode"
+              [ngModel]="formData().pincode"
+              (ngModelChange)="updateField('pincode', $event)"
+              name="pincode"
+              placeholder="Enter pincode"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-small"></span>
+            Saving...
+          } @else {
+            {{ isEditMode() ? 'Update Customer' : 'Add Customer' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

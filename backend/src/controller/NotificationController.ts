@@ -38,7 +38,7 @@ const getUserNotifications = AsyncHandler(async (req: Request, res: Response) =>
   const { userId } = req.params;
   const { page = 1, limit = 20, unreadOnly = false } = req.query;
 
-  const whereClause: any = { userId };
+  const whereClause: any = { userId: userId as string };
   
   if (unreadOnly === 'true') {
     whereClause.isRead = false;
@@ -55,7 +55,7 @@ const getUserNotifications = AsyncHandler(async (req: Request, res: Response) =>
 
   // Get unread count
   const unreadCount = await Notification.count({
-    where: { userId, isRead: false }
+    where: { userId: userId as string, isRead: false }
   });
 
   res.status(200).json(
@@ -77,7 +77,7 @@ const getUserNotifications = AsyncHandler(async (req: Request, res: Response) =>
 const markAsRead = AsyncHandler(async (req: Request, res: Response) => {
   const { notificationId } = req.params;
 
-  const notification = await Notification.findByPk(notificationId);
+  const notification = await Notification.findByPk(notificationId as string);
   if (!notification) {
     throw new ApiError(404, 'Notification not found');
   }
@@ -103,7 +103,7 @@ const markAllAsRead = AsyncHandler(async (req: Request, res: Response) => {
     },
     {
       where: {
-        userId,
+        userId: userId as string,
         isRead: false
       }
     }
@@ -118,7 +118,7 @@ const markAllAsRead = AsyncHandler(async (req: Request, res: Response) => {
 const deleteNotification = AsyncHandler(async (req: Request, res: Response) => {
   const { notificationId } = req.params;
 
-  const notification = await Notification.findByPk(notificationId);
+  const notification = await Notification.findByPk(notificationId as string);
   if (!notification) {
     throw new ApiError(404, 'Notification not found');
   }
@@ -231,7 +231,7 @@ const getNotificationStats = AsyncHandler(async (req: Request, res: Response) =>
   const { shopId } = req.params;
   const { startDate, endDate } = req.query;
 
-  const whereClause: any = { shopId };
+  const whereClause: any = { shopId: shopId as string };
   
   if (startDate && endDate) {
     whereClause.createdAt = {

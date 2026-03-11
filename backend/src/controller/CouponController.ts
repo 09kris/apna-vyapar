@@ -1,11 +1,46 @@
 import { Request, Response } from 'express';
 import { Coupon, Shop } from '../models';
+import ShopOwner from '../models/ShopOwner';
+import Employee from '../models/Employee';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
 import AsyncHandler from '../utils/AsyncHandler';
 
+/* =====================================
+   HELPERS
+===================================== */
+
+const verifyShopAccess = async (userId: string, shopId: string) => {
+  const shop = await Shop.findByPk(shopId);
+  if (!shop) throw new ApiError(404, 'Shop not found');
+
+  // First, look up the ShopOwner by userId to get the correct ownerId
+  const shopOwner = await ShopOwner.findOne({ where: { userId } });
+  
+  // Check if user is the shop owner (compare shopOwner.ownerId with shop.ownerId)
+  if (shopOwner && shop.ownerId === shopOwner.ownerId) {
+    return shop;
+  }
+
+  // Check if user is an active employee of the shop
+  const employee = await Employee.findOne({
+    where: {
+      userId: userId,
+      shopId: shopId,
+      isActive: true
+    }
+  });
+
+  if (!employee) {
+    throw new ApiError(403, 'Unauthorized - not a shop owner or active employee');
+  }
+
+  return shop;
+};
+
 // Create coupon
 const createCoupon = AsyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
   const {
     shopId,
     couponCode,
@@ -18,9 +53,13 @@ const createCoupon = AsyncHandler(async (req: Request, res: Response) => {
     validUntil,
     applicableTo,
     applicableItems,
-    description,
-    createdBy
+    description
   } = req.body;
+
+  if (!userId) throw new ApiError(401, 'Not authenticated');
+
+  // Verify shop access
+  await verifyShopAccess(userId, shopId);
 
   // Check if coupon code already exists
   const existingCoupon = await Coupon.findOne({ where: { couponCode } });
@@ -47,7 +86,7 @@ const createCoupon = AsyncHandler(async (req: Request, res: Response) => {
     applicableTo,
     applicableItems,
     description,
-    createdBy
+    createdBy: userId
   });
 
   res.status(201).json(
@@ -57,8 +96,14 @@ const createCoupon = AsyncHandler(async (req: Request, res: Response) => {
 
 // Get shop coupons
 const getShopCoupons = AsyncHandler(async (req: Request, res: Response) => {
-  const { shopId } = req.params;
+  const userId = (req as any).user?.userId;
+  const shopId = req.params.shopId as string;
   const { page = 1, limit = 20, isActive, search } = req.query;
+
+  if (!userId) throw new ApiError(401, 'Not authenticated');
+
+  // Verify shop access
+  await verifyShopAccess(userId, shopId);
 
   const whereClause: any = { shopId };
   
@@ -204,13 +249,19 @@ const applyCoupon = AsyncHandler(async (req: Request, res: Response) => {
 
 // Update coupon
 const updateCoupon = AsyncHandler(async (req: Request, res: Response) => {
-  const { couponId } = req.params;
+  const userId = (req as any).user?.userId;
+  const couponId = req.params.couponId as string;
   const updateData = req.body;
+
+  if (!userId) throw new ApiError(401, 'Not authenticated');
 
   const coupon = await Coupon.findByPk(couponId);
   if (!coupon) {
     throw new ApiError(404, 'Coupon not found');
   }
+
+  // Verify shop access
+  await verifyShopAccess(userId, coupon.shopId);
 
   // If updating coupon code, check uniqueness
   if (updateData.couponCode && updateData.couponCode !== coupon.couponCode) {
@@ -232,12 +283,18 @@ const updateCoupon = AsyncHandler(async (req: Request, res: Response) => {
 
 // Delete coupon
 const deleteCoupon = AsyncHandler(async (req: Request, res: Response) => {
-  const { couponId } = req.params;
+  const userId = (req as any).user?.userId;
+  const couponId = req.params.couponId as string;
+
+  if (!userId) throw new ApiError(401, 'Not authenticated');
 
   const coupon = await Coupon.findByPk(couponId);
   if (!coupon) {
     throw new ApiError(404, 'Coupon not found');
   }
+
+  // Verify shop access
+  await verifyShopAccess(userId, coupon.shopId);
 
   await coupon.destroy();
 
@@ -248,9 +305,12 @@ const deleteCoupon = AsyncHandler(async (req: Request, res: Response) => {
 
 // Generate coupon code
 const generateCouponCode = AsyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
   const { prefix = '', length = 8 } = req.body;
 
-  let couponCode: string;
+  if (!userId) throw new ApiError(401, 'Not authenticated');
+
+  let couponCode = '';
   let isUnique = false;
   
   while (!isUnique) {

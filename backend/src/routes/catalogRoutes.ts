@@ -5,12 +5,12 @@ import {
   getCatalogProducts,
   getCatalogAnalytics
 } from '../controller/CatalogController';
-import authMiddleware from '../middleware/authMiddleware';
+import { authMiddleware, roleMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Generate referral code for shop (protected)
-router.post('/shops/:shopId/referral-code', authMiddleware, generateReferralCode);
+// Generate referral code for shop (protected - SHOP_OWNER only)
+router.post('/shops/:shopId/referral-code', authMiddleware, roleMiddleware(['SHOP_OWNER']), generateReferralCode);
 
 // Public catalog access via referral code
 router.post('/catalog/access', accessCatalog);
@@ -18,7 +18,7 @@ router.post('/catalog/access', accessCatalog);
 // Get catalog products (public)
 router.get('/catalog/:referralCode/products', getCatalogProducts);
 
-// Get catalog analytics (protected)
-router.get('/shops/:shopId/catalog/analytics', authMiddleware, getCatalogAnalytics);
+// Get catalog analytics (protected - SHOP_OWNER only)
+router.get('/shops/:shopId/catalog/analytics', authMiddleware, roleMiddleware(['SHOP_OWNER']), getCatalogAnalytics);
 
 export default router;

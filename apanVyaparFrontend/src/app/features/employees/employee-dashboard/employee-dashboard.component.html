@@ -1,0 +1,212 @@
+<div class="employee-dashboard">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Employee Dashboard</h1>
+      <p class="page-subtitle">Overview of your employee management</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="refreshStats()">
+        🔄 Refresh
+      </button>
+      <button class="btn btn-primary" [routerLink]="['/employees/add']" [queryParams]="{shopId: selectedShopId()}">
+        + Add Employee
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading employee statistics...</div>
+  } @else if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  } @else if (stats()) {
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card" style="border-left-color: #3b82f6;">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>Total Employees</h3>
+          <p class="stat-value">{{ stats()?.totalEmployees || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #10b981;">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3>Active Employees</h3>
+          <p class="stat-value">{{ stats()?.activeEmployees || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #f59e0b;">
+        <div class="stat-icon">⏸️</div>
+        <div class="stat-content">
+          <h3>Inactive Employees</h3>
+          <p class="stat-value">{{ stats()?.inactiveEmployees || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #8b5cf6;">
+        <div class="stat-icon">🆕</div>
+        <div class="stat-content">
+          <h3>New This Month</h3>
+          <p class="stat-value">{{ stats()?.newEmployeesThisMonth || 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary Overview -->
+    <div class="salary-section">
+      <h2 class="section-title">Salary Overview</h2>
+      <div class="salary-cards">
+        <div class="salary-card">
+          <span class="salary-label">Total Monthly Salary</span>
+          <span class="salary-value">₹{{ stats()?.totalMonthlySalary | number:'1.0-0' }}</span>
+        </div>
+        <div class="salary-card">
+          <span class="salary-label">Average Salary</span>
+          <span class="salary-value">₹{{ stats()?.averageSalary | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <h3>Employee Type Distribution</h3>
+        <div class="chart-container">
+          <canvas #employeeTypeChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Department Distribution</h3>
+        <div class="chart-container">
+          <canvas #salaryChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Distribution -->
+    <div class="distribution-section">
+      <div class="distribution-card">
+        <h3 class="card-title">By Employee Type</h3>
+        <div class="distribution-list">
+          @for (type of stats()?.employeesByType; track type.employeeType) {
+            <div class="distribution-item">
+              <span class="type-badge" [class.manager]="type.employeeType === 'MANAGER'" [class.worker]="type.employeeType === 'WORKER'">
+                {{ type.employeeType || 'Unknown' }}
+              </span>
+              <span class="count">{{ type.count }}</span>
+            </div>
+          } @empty {
+            <p class="no-data">No data available</p>
+          }
+        </div>
+      </div>
+
+      <div class="distribution-card">
+        <h3 class="card-title">By Employment Type</h3>
+        <div class="distribution-list">
+          @for (type of stats()?.employeesByEmploymentType; track type.employmentType) {
+            <div class="distribution-item">
+              <span class="type-badge" [class.full-time]="type.employmentType === 'FULL_TIME'" 
+                    [class.part-time]="type.employmentType === 'PART_TIME'"
+                    [class.contract]="type.employmentType === 'CONTRACT'">
+                {{ type.employmentType.replace('_', '-') || 'Unknown' }}
+              </span>
+              <span class="count">{{ type.count }}</span>
+            </div>
+          } @empty {
+            <p class="no-data">No data available</p>
+          }
+        </div>
+      </div>
+
+      <div class="distribution-card">
+        <h3 class="card-title">By Department</h3>
+        <div class="distribution-list">
+          @for (dept of stats()?.employeesByDepartment; track dept.department) {
+            <div class="distribution-item">
+              <span class="department-name">{{ dept.department }}</span>
+              <span class="count">{{ dept.count }}</span>
+            </div>
+          } @empty {
+            <p class="no-data">No departments assigned</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Employees -->
+    <div class="recent-section">
+      <div class="section-header">
+        <h2 class="section-title">Recent Employees</h2>
+        <a [routerLink]="['/employees']" [queryParams]="{shopId: selectedShopId()}" class="view-all-link">
+          View All →
+        </a>
+      </div>
+      <div class="recent-table-container">
+        <table class="recent-table">
+          <thead>
+            <tr>
+              <th>Designation</th>
+              <th>Department</th>
+              <th>Type</th>
+              <th>Employment</th>
+              <th>Status</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (employee of stats()?.recentEmployees; track employee.employeeId) {
+              <tr>
+                <td>{{ employee.designation || '-' }}</td>
+                <td>{{ employee.department || '-' }}</td>
+                <td>
+                  <span class="type-badge" [class.manager]="employee.employeeType === 'MANAGER'" [class.worker]="employee.employeeType === 'WORKER'">
+                    {{ employee.employeeType || 'Worker' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="type-badge" [class.full-time]="employee.employmentType === 'FULL_TIME'" 
+                        [class.part-time]="employee.employmentType === 'PART_TIME'"
+                        [class.contract]="employee.employmentType === 'CONTRACT'">
+                    {{ employee.employmentType?.replace('_', '-') || 'Full-time' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge" [class.active]="employee.isActive" [class.inactive]="!employee.isActive">
+                    {{ employee.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>{{ employee.joiningDate | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="no-data">No employees found</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="actions-grid">
+        <a [routerLink]="['/employees/add']" [queryParams]="{shopId: selectedShopId()}" class="action-card">
+          <span class="action-icon">➕</span>
+          <span>Add New Employee</span>
+        </a>
+        <a [routerLink]="['/employees']" [queryParams]="{shopId: selectedShopId()}" class="action-card">
+          <span class="action-icon">📋</span>
+          <span>View All Employees</span>
+        </a>
+        <a [routerLink]="['/settings']" [queryParams]="{tab: 'employees'}" class="action-card">
+          <span class="action-icon">⚙️</span>
+          <span>Configure Fields</span>
+        </a>
+      </div>
+    </div>
+  }
+</div>

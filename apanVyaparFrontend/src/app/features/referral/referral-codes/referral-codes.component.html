@@ -1,0 +1,377 @@
+<div class="referral-codes-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Referral Codes</h1>
+      <p class="subtitle">Create and manage referral codes for products and categories</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <span class="icon">+</span>
+      Create Referral Code
+    </button>
+  </div>
+
+  <!-- Messages -->
+  @if (error()) {
+    <div class="alert alert-error">
+      {{ error() }}
+      <button class="close-btn" (click)="error.set(null)">×</button>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      {{ successMessage() }}
+      <button class="close-btn" (click)="successMessage.set(null)">×</button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading referral codes...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && referralCodes().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No Referral Codes Yet</h3>
+      <p>Create your first referral code to share specific products or categories with customers.</p>
+      <button class="btn-primary" (click)="openCreateModal()">Create Referral Code</button>
+    </div>
+  }
+
+  <!-- Referral Codes List -->
+  @if (!loading() && referralCodes().length > 0) {
+    <div class="referral-codes-grid">
+      @for (code of referralCodes(); track code.referralId) {
+        <div class="referral-card" [class.inactive]="!code.isActive">
+          <div class="card-header">
+            <div class="code-badge">
+              <span class="code">{{ code.referralCode }}</span>
+              <button class="copy-btn" (click)="copyReferralCode(code.referralCode)" title="Copy code">
+                📋
+              </button>
+            </div>
+            <div class="status-badge" [class.active]="code.isActive">
+              {{ code.isActive ? 'Active' : 'Inactive' }}
+            </div>
+          </div>
+
+          <div class="card-body">
+            <h3 class="referral-name">{{ code.name }}</h3>
+            @if (code.description) {
+              <p class="description">{{ code.description }}</p>
+            }
+
+            <div class="selection-info">
+              <span class="label">Type:</span>
+              <span class="value">{{ code.selectionType === 'products' ? 'Products' : 'Categories' }}</span>
+            </div>
+
+            <div class="selection-info">
+              <span class="label">Selected:</span>
+              @if (code.selectionType === 'products') {
+                <span class="value">
+                  {{ code.selectedProducts?.length || 0 }} products
+                  @if (code.selectedProducts && code.selectedProducts.length > 0) {
+                    <span class="preview">({{ getProductNames(code.selectedProducts) }})</span>
+                  }
+                </span>
+              } @else {
+                <span class="value">
+                  {{ code.selectedCategories?.length || 0 }} categories
+                  @if (code.selectedCategories && code.selectedCategories.length > 0) {
+                    <span class="preview">({{ getCategoryNames(code.selectedCategories) }})</span>
+                  }
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <button
+              class="btn-icon"
+              (click)="toggleReferralCodeStatus(code)"
+              [disabled]="toggling() === code.referralId"
+              [title]="code.isActive ? 'Deactivate' : 'Activate'"
+            >
+              {{ code.isActive ? '⏸️' : '▶️' }}
+            </button>
+            <button
+              class="btn-icon"
+              (click)="openEditModal(code)"
+              title="Edit"
+            >
+              ✏️
+            </button>
+            <button
+              class="btn-icon delete"
+              (click)="openDeleteModal(code)"
+              title="Delete"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create Modal -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create Referral Code</h2>
+        <button class="close-btn" (click)="closeCreateModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name *</label>
+          <input
+            type="text"
+            [(ngModel)]="formData().name"
+            placeholder="e.g., Summer Sale 2024"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            [(ngModel)]="formData().description"
+            placeholder="Optional description for this referral code"
+            class="form-control"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Selection Type *</label>
+          <select
+            [(ngModel)]="formData().selectionType"
+            (change)="onSelectionTypeChange()"
+            class="form-control"
+          >
+            <option value="products">Products</option>
+            <option value="categories">Categories</option>
+          </select>
+        </div>
+
+        <!-- Products Selection -->
+        @if (formData().selectionType === 'products') {
+          <div class="form-group">
+            <label>Select Products * ({{ selectedProductIds().length }} selected)</label>
+            <div class="selection-list">
+              @for (product of availableProducts(); track product.id || product.productId) {
+                <div
+                  class="selection-item"
+                  [class.selected]="selectedProductIds().includes(product.id || product.productId || '')"
+                  (click)="toggleProductSelection(product.id || product.productId || '')"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="selectedProductIds().includes(product.id || product.productId || '')"
+                  />
+                  <span class="item-name">{{ product.productName }}</span>
+                  <span class="item-price">₹{{ product.retailPrice }}/{{ product.unit }}</span>
+                </div>
+              }
+              @if (availableProducts().length === 0) {
+                <p class="no-data">No products available. Please add products first.</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Categories Selection -->
+        @if (formData().selectionType === 'categories') {
+          <div class="form-group">
+            <label>Select Categories * ({{ selectedCategoryIds().length }} selected)</label>
+            <div class="selection-list">
+              @for (category of availableCategories(); track category.id) {
+                <div
+                  class="selection-item"
+                  [class.selected]="selectedCategoryIds().includes(category.id)"
+                  (click)="toggleCategorySelection(category.id)"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="selectedCategoryIds().includes(category.id)"
+                  />
+                  <span class="item-name">{{ category.categoryName }}</span>
+                </div>
+              }
+              @if (availableCategories().length === 0) {
+                <p class="no-data">No categories available. Please add categories first.</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button
+          class="btn-primary"
+          (click)="createReferralCode()"
+          [disabled]="loading() || getSelectedCount() === 0 || !formData().name.trim()"
+        >
+          @if (loading()) {
+            <span class="spinner-small"></span>
+          }
+          Create Referral Code
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Modal -->
+@if (showEditModal()) {
+  <div class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Referral Code</h2>
+        <button class="close-btn" (click)="closeEditModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name *</label>
+          <input
+            type="text"
+            [(ngModel)]="formData().name"
+            placeholder="e.g., Summer Sale 2024"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            [(ngModel)]="formData().description"
+            placeholder="Optional description for this referral code"
+            class="form-control"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Selection Type *</label>
+          <select
+            [(ngModel)]="formData().selectionType"
+            (change)="onSelectionTypeChange()"
+            class="form-control"
+          >
+            <option value="products">Products</option>
+            <option value="categories">Categories</option>
+          </select>
+        </div>
+
+        <!-- Products Selection -->
+        @if (formData().selectionType === 'products') {
+          <div class="form-group">
+            <label>Select Products * ({{ selectedProductIds().length }} selected)</label>
+            <div class="selection-list">
+              @for (product of availableProducts(); track product.id || product.productId) {
+                <div
+                  class="selection-item"
+                  [class.selected]="selectedProductIds().includes(product.id || product.productId || '')"
+                  (click)="toggleProductSelection(product.id || product.productId || '')"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="selectedProductIds().includes(product.id || product.productId || '')"
+                  />
+                  <span class="item-name">{{ product.productName }}</span>
+                  <span class="item-price">₹{{ product.retailPrice }}/{{ product.unit }}</span>
+                </div>
+              }
+              @if (availableProducts().length === 0) {
+                <p class="no-data">No products available.</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Categories Selection -->
+        @if (formData().selectionType === 'categories') {
+          <div class="form-group">
+            <label>Select Categories * ({{ selectedCategoryIds().length }} selected)</label>
+            <div class="selection-list">
+              @for (category of availableCategories(); track category.id) {
+                <div
+                  class="selection-item"
+                  [class.selected]="selectedCategoryIds().includes(category.id)"
+                  (click)="toggleCategorySelection(category.id)"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="selectedCategoryIds().includes(category.id)"
+                  />
+                  <span class="item-name">{{ category.categoryName }}</span>
+                </div>
+              }
+              @if (availableCategories().length === 0) {
+                <p class="no-data">No categories available.</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditModal()">Cancel</button>
+        <button
+          class="btn-primary"
+          (click)="updateReferralCode()"
+          [disabled]="loading() || getSelectedCount() === 0 || !formData().name.trim()"
+        >
+          @if (loading()) {
+            <span class="spinner-small"></span>
+          }
+          Update Referral Code
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Modal -->
+@if (showDeleteModal()) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Delete Referral Code</h2>
+        <button class="close-btn" (click)="closeDeleteModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Are you sure you want to delete the referral code <strong>{{ selectedReferralCode()?.referralCode }}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+        <button
+          class="btn-danger"
+          (click)="deleteReferralCode()"
+          [disabled]="loading()"
+        >
+          @if (loading()) {
+            <span class="spinner-small"></span>
+          }
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

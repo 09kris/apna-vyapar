@@ -1,11 +1,24 @@
 import sequelize, { testConnection, syncDatabase } from './config/database';
 import app from './app';
 import dotenv from 'dotenv';
+import socketService from './socket/socketService';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Global error handlers to catch unhandled errors and prevent silent crashes
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  console.error('Stack:', err.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 async function startServer() {
   try {
@@ -14,7 +27,7 @@ async function startServer() {
 
     // Sync database (create tables if they don't exist)
     const forceSync = process.env.FORCE_SYNC === 'true';
-    await syncDatabase(forceSync);
+    await syncDatabase(forceSync, false); // Only create tables, don't alter
 
     // Start server
     const server = app.listen(PORT, () => {
@@ -28,9 +41,19 @@ async function startServer() {
       `);
     });
 
+    // Initialize Socket.io
+    socketService.initialize(server);
+    console.log('🔌 Socket.io service initialized');
+
+    // Keep server alive - log periodically to ensure event loop is active
+    const keepAliveInterval = setInterval(() => {
+      console.log('✅ Server is running and listening on port', PORT);
+    }, 30000); // Log every 30 seconds
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
       console.log('\n📌 SIGTERM signal received: closing HTTP server');
+      clearInterval(keepAliveInterval);
       server.close(async () => {
         console.log('🔌 HTTP server closed');
         process.exit(0);
@@ -39,6 +62,7 @@ async function startServer() {
 
     process.on('SIGINT', async () => {
       console.log('\n📌 SIGINT signal received: closing HTTP server');
+      clearInterval(keepAliveInterval);
       server.close(async () => {
         console.log('🔌 HTTP server closed');
         process.exit(0);
@@ -51,3 +75,4 @@ async function startServer() {
 }
 
 startServer();
+

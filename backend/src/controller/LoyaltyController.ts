@@ -6,7 +6,7 @@ import AsyncHandler from '../utils/AsyncHandler';
 
 // Get customer loyalty points balance
 const getLoyaltyBalance = AsyncHandler(async (req: Request, res: Response) => {
-  const { customerId } = req.params;
+  const { customerId } = req.params as { customerId: string };
 
   const customer = await ShopCustomer.findByPk(customerId);
   if (!customer) {

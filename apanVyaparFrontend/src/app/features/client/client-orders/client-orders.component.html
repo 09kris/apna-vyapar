@@ -1,0 +1,126 @@
+<div class="client-orders">
+  <div class="page-header">
+    <h1>My Orders</h1>
+    <p>View and track all your orders</p>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === ''"
+      (click)="filterByStatus('')">
+      All Orders
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === 'PENDING'"
+      (click)="filterByStatus('PENDING')">
+      Pending
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === 'CONFIRMED'"
+      (click)="filterByStatus('CONFIRMED')">
+      Confirmed
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === 'SHIPPED'"
+      (click)="filterByStatus('SHIPPED')">
+      Shipped
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === 'DELIVERED'"
+      (click)="filterByStatus('DELIVERED')">
+      Delivered
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="statusFilter() === 'CANCELLED'"
+      (click)="filterByStatus('CANCELLED')">
+      Cancelled
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading orders...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Orders List -->
+    @if (orders().length > 0) {
+      <div class="orders-list">
+        @for (order of orders(); track order.orderId) {
+          <div class="order-card">
+            <div class="order-header">
+              <div class="order-info">
+                <span class="order-number">{{ order.orderNumber }}</span>
+                <span class="order-date">{{ order.createdAt | date:'medium' }}</span>
+              </div>
+              <span class="order-status" [class]="getStatusClass(order.orderStatus)">
+                {{ order.orderStatus }}
+              </span>
+            </div>
+            
+            <div class="order-body">
+              <div class="shop-info">
+                <span class="shop-name">{{ order.shop?.shopName }}</span>
+                <span class="shop-address">{{ order.shop?.city }}</span>
+              </div>
+              
+              <div class="order-items">
+                <span class="items-count">{{ order.items?.length || 0 }} item(s)</span>
+              </div>
+              
+              <div class="order-amount">
+                <span class="label">Total</span>
+                <span class="amount">₹{{ order.totalAmount?.toLocaleString('en-IN') }}</span>
+              </div>
+            </div>
+            
+            <div class="order-footer">
+              <a [routerLink]="['/my-orders', order.orderId]" class="view-details">
+                View Details →
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button 
+            class="page-btn" 
+            [disabled]="currentPage() === 1"
+            (click)="prevPage()">
+            ← Previous
+          </button>
+          <span class="page-info">Page {{ currentPage() }} of {{ totalPages() }}</span>
+          <button 
+            class="page-btn" 
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()">
+            Next →
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Empty State -->
+    @if (orders().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">📦</span>
+        <h3>No Orders Yet</h3>
+        <p>You haven't placed any orders yet. Start shopping to see your orders here.</p>
+      </div>
+    }
+  }
+</div>
+

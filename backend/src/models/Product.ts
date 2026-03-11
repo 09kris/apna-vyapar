@@ -32,6 +32,10 @@ interface ProductAttributes {
   batchNumber?: string;
   warrantyMonths?: number;
   returnDays?: number;
+  hsnCode?: string;
+  sgstRate?: number;
+  cgstRate?: number;
+  igstRate?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -82,6 +86,10 @@ class Product
   public batchNumber?: string;
   public warrantyMonths?: number;
   public returnDays?: number;
+  public hsnCode?: string;
+  public sgstRate?: number;
+  public cgstRate?: number;
+  public igstRate?: number;
   public readonly createdAt?: Date;
   public readonly updatedAt?: Date;
 }
@@ -205,6 +213,26 @@ Product.init(
     returnDays: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
+    },
+    hsnCode: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      comment: 'Harmonized System of Nomenclature code for GST classification',
+    },
+    sgstRate: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      comment: 'State GST rate as percentage',
+    },
+    cgstRate: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      comment: 'Central GST rate as percentage',
+    },
+    igstRate: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      comment: 'Integrated GST rate as percentage (for interstate)',
     },
   },
   {

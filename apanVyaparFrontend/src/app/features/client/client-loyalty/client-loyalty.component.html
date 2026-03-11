@@ -1,0 +1,83 @@
+<div class="client-loyalty">
+  <div class="page-header">
+    <h1>My Loyalty Points</h1>
+    <p>View and manage your loyalty points</p>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading loyalty data...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Points Card -->
+    <div class="points-card">
+      <div class="points-icon">🎁</div>
+      <div class="points-info">
+        <span class="points-label">Available Points</span>
+        <span class="points-value">{{ totalPoints() }}</span>
+      </div>
+    </div>
+
+    <!-- How to Earn -->
+    <div class="info-section">
+      <h2>How to Earn Points</h2>
+      <div class="earn-ways">
+        <div class="earn-way">
+          <span class="icon">🛒</span>
+          <span class="description">Earn 1 point for every ₹10 spent</span>
+        </div>
+        <div class="earn-way">
+          <span class="icon">👤</span>
+          <span class="description">Refer a friend and earn 100 points</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="transactions-section">
+      <h2>Points History</h2>
+      
+      @if (transactions().length > 0) {
+        <div class="transactions-list">
+          @for (txn of transactions(); track txn.id) {
+            <div class="transaction-row">
+              <div class="txn-icon" [class]="getTransactionClass(txn.transactionType)">
+                @if (txn.transactionType === 'Earn') {
+                  <span>➕</span>
+                } @else if (txn.transactionType === 'Redeem') {
+                  <span>➖</span>
+                } @else {
+                  <span>⏰</span>
+                }
+              </div>
+              <div class="txn-details">
+                <span class="txn-reason">{{ txn.reason || txn.transactionType }}</span>
+                <span class="txn-shop">{{ txn.shop?.shopName }}</span>
+                <span class="txn-date">{{ txn.createdAt | date:'medium' }}</span>
+              </div>
+              <div class="txn-points" [class]="getTransactionClass(txn.transactionType)">
+                @if (txn.transactionType === 'Earn') {
+                  +{{ txn.pointsChange }}
+                } @else {
+                  -{{ txn.pointsChange }}
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (transactions().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📊</span>
+          <h3>No Transactions Yet</h3>
+          <p>Your loyalty points transactions will appear here.</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+

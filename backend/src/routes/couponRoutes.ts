@@ -9,7 +9,7 @@ import {
   generateCouponCode,
   getCouponStats
 } from '../controller/CouponController';
-import authMiddleware from '../middleware/authMiddleware';
+import {authMiddleware} from '../middleware/authMiddleware';
 
 const router = Router();
 

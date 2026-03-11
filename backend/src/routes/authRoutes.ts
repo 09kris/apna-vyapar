@@ -6,6 +6,7 @@ import {
   logoutUser,
   getCurrentUser,
   changePassword,
+  completeShopOwnerProfile,
 } from '../controller/AuthController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
@@ -20,5 +21,6 @@ router.post('/refresh-token', refreshAccessToken);
 router.post('/logout', authMiddleware, logoutUser);
 router.get('/current-user', authMiddleware, getCurrentUser);
 router.post('/change-password', authMiddleware, changePassword);
+router.post('/complete-shop-owner-profile', authMiddleware, completeShopOwnerProfile);
 
 export default router;

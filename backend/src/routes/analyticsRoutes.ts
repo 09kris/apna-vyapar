@@ -5,9 +5,10 @@ import {
   getProductPerformance,
   getCustomerAnalytics,
   getInventoryAnalytics,
-  getFinancialSummary
+  getFinancialSummary,
+  getEmployeeAnalytics
 } from '../controller/AnalyticsController';
-import authMiddleware from '../middleware/authMiddleware';
+import {authMiddleware} from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -28,5 +29,8 @@ router.get('/shops/:shopId/analytics/inventory', authMiddleware, getInventoryAna
 
 // Financial summary
 router.get('/shops/:shopId/analytics/financial', authMiddleware, getFinancialSummary);
+
+// Employee analytics
+router.get('/shops/:shopId/analytics/employees', authMiddleware, getEmployeeAnalytics);
 
 export default router;

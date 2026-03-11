@@ -1,0 +1,155 @@
+<div class="client-dashboard">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <h1>Welcome, {{ currentUser()?.fullName || 'Customer' }}!</h1>
+    <p>Manage your orders, loyalty points, and profile</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your dashboard...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Profile Card -->
+    @if (profile()) {
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar">
+            {{ profile()?.fullName?.charAt(0)?.toUpperCase() || '?' }}
+          </div>
+          <div class="profile-info">
+            <h2>{{ profile()?.fullName }}</h2>
+            <p class="customer-type">
+              <span class="badge" [class.retail]="profile()?.customerType === 'Retail'" [class.wholesale]="profile()?.customerType === 'Wholesale'">
+                {{ profile()?.customerType }}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div class="profile-details">
+          <div class="detail">
+            <span class="label">Email:</span>
+            <span class="value">{{ profile()?.email || 'Not provided' }}</span>
+          </div>
+          <div class="detail">
+            <span class="label">Phone:</span>
+            <span class="value">{{ profile()?.phone }}</span>
+          </div>
+          <div class="detail">
+            <span class="label">Shop:</span>
+            <span class="value">{{ profile()?.shop?.shopName || 'N/A' }} - {{ profile()?.shop?.city || '' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card loyalty">
+        <div class="stat-icon">🎁</div>
+        <div class="stat-content">
+          <h3>Loyalty Points</h3>
+          <p class="stat-value">{{ loyaltyPoints() }}</p>
+        </div>
+        <a routerLink="/my-loyalty" class="stat-link">View Details →</a>
+      </div>
+      
+      <div class="stat-card orders">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <h3>Total Orders</h3>
+          <p class="stat-value">{{ profile()?.totalPurchases || 0 }}</p>
+        </div>
+        <a routerLink="/my-orders" class="stat-link">View All →</a>
+      </div>
+      
+      <div class="stat-card purchases">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <h3>Total Spent</h3>
+          <p class="stat-value">₹{{ (profile()?.totalPurchases || 0).toLocaleString('en-IN') }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <h3>Order Trends</h3>
+        <div class="chart-container">
+          <canvas #ordersChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Spending Analysis</h3>
+        <div class="chart-container">
+          <canvas #spendingChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="actions-grid">
+        <a routerLink="/my-orders" class="action-card">
+          <span class="action-icon">📦</span>
+          <span>My Orders</span>
+        </a>
+        <a routerLink="/my-loyalty" class="action-card">
+          <span class="action-icon">🎁</span>
+          <span>Loyalty Points</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    @if (recentOrders().length > 0) {
+      <div class="recent-orders">
+        <div class="section-header">
+          <h2>Recent Orders</h2>
+          <a routerLink="/my-orders" class="view-all">View All →</a>
+        </div>
+        
+        <div class="orders-list">
+          @for (order of recentOrders(); track order.orderId) {
+            <div class="order-card">
+              <div class="order-header">
+                <span class="order-number">{{ order.orderNumber }}</span>
+                <span class="order-status" [class]="getStatusClass(order.orderStatus)">
+                  {{ order.orderStatus }}
+                </span>
+              </div>
+              <div class="order-details">
+                <div class="order-info">
+                  <span class="shop-name">{{ order.shop?.shopName }}</span>
+                  <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="order-amount">
+                  ₹{{ order.totalAmount?.toLocaleString('en-IN') }}
+                </div>
+              </div>
+              <a [routerLink]="['/my-orders', order.orderId]" class="view-order">
+                View Details →
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Empty State for No Profile -->
+    @if (!profile()) {
+      <div class="empty-state">
+        <span class="empty-icon">👤</span>
+        <h3>No Customer Profile Found</h3>
+        <p>You haven't registered with any shop yet. Visit a shop to become a customer.</p>
+      </div>
+    }
+  }
+</div>
+

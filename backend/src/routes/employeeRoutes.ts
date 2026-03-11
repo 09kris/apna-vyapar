@@ -12,19 +12,21 @@ import { authMiddleware, roleMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// All routes require authentication and SHOP_OWNER role
+// All routes require authentication
 router.use(authMiddleware);
-router.use(roleMiddleware(['SHOP_OWNER']));
 
-// Employee field configuration
-router.post('/:shopId/configure-fields', configureEmployeeFields);
-router.get('/:shopId/field-configuration', getEmployeeFieldConfiguration);
+// Employee field configuration - only SHOP_OWNER can configure
+router.post('/:shopId/configure-fields', roleMiddleware(['SHOP_OWNER']), configureEmployeeFields);
+router.get('/:shopId/field-configuration', roleMiddleware(['SHOP_OWNER']), getEmployeeFieldConfiguration);
 
 // Employee management
-router.post('/:shopId/add', addEmployee);
-router.get('/:shopId/employees', getShopEmployees);
-router.get('/details/:employeeId', getEmployeeById);
-router.put('/update/:employeeId', updateEmployee);
-router.delete('/:employeeId', deleteEmployee);
+// View employees - both SHOP_OWNER and EMPLOYEE can view
+router.get('/:shopId/employees', roleMiddleware(['SHOP_OWNER', 'EMPLOYEE']), getShopEmployees);
+router.get('/details/:employeeId', roleMiddleware(['SHOP_OWNER', 'EMPLOYEE']), getEmployeeById);
+
+// Add, update, delete - only SHOP_OWNER can manage
+router.post('/:shopId/add', roleMiddleware(['SHOP_OWNER']), addEmployee);
+router.put('/update/:employeeId', roleMiddleware(['SHOP_OWNER']), updateEmployee);
+router.delete('/:employeeId', roleMiddleware(['SHOP_OWNER']), deleteEmployee);
 
 export default router;

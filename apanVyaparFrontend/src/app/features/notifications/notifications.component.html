@@ -1,0 +1,65 @@
+<div class="notifications-container">
+  <div class="notifications-header">
+    <h1>Notifications</h1>
+    <div class="header-actions">
+      <button 
+        class="filter-btn" 
+        [class.active]="showUnreadOnly()"
+        (click)="toggleUnreadFilter()">
+        {{ showUnreadOnly() ? 'Show All' : 'Unread Only' }}
+      </button>
+      <button 
+        class="mark-all-btn" 
+        (click)="markAllAsRead()"
+        [disabled]="unreadCount() === 0">
+        Mark All as Read
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p>{{ error() }}</p>
+      <button (click)="loadNotifications()">Retry</button>
+    </div>
+  } @else if (filteredNotifications.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🔔</span>
+      <h3>No notifications</h3>
+      <p>You're all caught up!</p>
+    </div>
+  } @else {
+    <div class="notifications-list">
+      @for (notification of filteredNotifications; track notification.id) {
+        <div 
+          class="notification-item" 
+          [class.unread]="!notification.isRead"
+          [class]="getPriorityClass(notification.priority)"
+          (click)="onNotificationClick(notification)">
+          <div class="notification-icon">
+            {{ getNotificationIcon(notification.notificationType) }}
+          </div>
+          <div class="notification-content">
+            <div class="notification-header">
+              <h3 class="notification-title">{{ notification.title }}</h3>
+              <span class="notification-time">{{ formatDate(notification.createdAt) }}</span>
+            </div>
+            <p class="notification-message">{{ notification.message }}</p>
+            @if (notification.priority && notification.priority !== 'Normal') {
+              <span class="priority-badge">{{ notification.priority }}</span>
+            }
+          </div>
+          @if (!notification.isRead) {
+            <div class="unread-indicator"></div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+

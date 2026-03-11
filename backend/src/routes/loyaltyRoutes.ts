@@ -6,7 +6,7 @@ import {
   calculateOrderPoints,
   getLoyaltyStats
 } from '../controller/LoyaltyController';
-import authMiddleware from '../middleware/authMiddleware';
+import {authMiddleware} from '../middleware/authMiddleware';
 
 const router = Router();
 

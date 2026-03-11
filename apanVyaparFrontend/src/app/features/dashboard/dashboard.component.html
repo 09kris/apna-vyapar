@@ -1,0 +1,53 @@
+<div class="dashboard">
+  <div class="welcome-section">
+    <h1>Welcome back, {{ currentUser()?.fullName || 'User' }}!</h1>
+    <p>Here's what's happening with your shop today.</p>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats()" [style.border-left-color]="stat.color">
+      <div class="stat-icon">{{ stat.icon }}</div>
+      <div class="stat-content">
+        <h3>{{ stat.title }}</h3>
+        <p class="stat-value">{{ stat.value }}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="charts-section">
+    <div class="chart-card">
+      <h3>Sales Trend</h3>
+      <div class="chart-container">
+        <canvas #salesChart></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Orders Overview</h3>
+      <div class="chart-container">
+        <canvas #ordersChart></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/products" class="action-card">
+        <span class="action-icon">📦</span>
+        <span>Add Product</span>
+      </a>
+      <a routerLink="/orders" class="action-card">
+        <span class="action-icon">🛒</span>
+        <span>View Orders</span>
+      </a>
+      <a routerLink="/customers" class="action-card">
+        <span class="action-icon">👥</span>
+        <span>Add Customer</span>
+      </a>
+      <a routerLink="/employees" class="action-card">
+        <span class="action-icon">👤</span>
+        <span>Manage Staff</span>
+      </a>
+    </div>
+  </div>
+</div>

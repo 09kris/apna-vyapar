@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import ShopOwner from '../models/ShopOwner';
+import Shop from '../models/Shop';
 import ApiError from '../utils/ApiError';
 import ApiResponse from '../utils/ApiResponse';
 import asyncHandler from '../utils/AsyncHandler';
@@ -41,10 +42,9 @@ const generateTokens = (userId: string) => {
   return { accessToken, refreshToken };
 };
 
-// Register User
+// Register User - Part 1: User Details Only
 export const registerUser = asyncHandler(async (req: RegisterRequest, res: Response) => {
-  const { firstName, lastName, email, phoneNumber, password, userType, businessName, businessEmail, businessPhone } =
-    req.body;
+  const { firstName, lastName, email, phoneNumber, password, userType } = req.body;
 
   // Validation
   if (!firstName || !lastName || !email || !password || !userType) {
@@ -68,7 +68,8 @@ export const registerUser = asyncHandler(async (req: RegisterRequest, res: Respo
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash(password, salt);
 
-  // Create user
+  // Create user (Part 1 - User details only)
+  // ShopOwner profile will be created separately in Part 2
   const user = await User.create({
     firstName,
     lastName,
@@ -79,27 +80,14 @@ export const registerUser = asyncHandler(async (req: RegisterRequest, res: Respo
     emailVerified: false,
   });
 
-  // If SHOP_OWNER, create ShopOwner profile
-  if (userType === 'SHOP_OWNER') {
-    if (!businessName) {
-      throw new ApiError(400, 'Business name is required for shop owners');
-    }
-
-    await ShopOwner.create({
-      userId: user.userId,
-      businessName,
-      businessEmail: businessEmail || email,
-      businessPhone: businessPhone || phoneNumber,
-      isVerified: false,
-      isSubscriptionActive: false,
-    });
-  }
-
   // Generate tokens
   const { accessToken, refreshToken } = generateTokens(user.userId);
 
   // Update last login
   await user.update({ lastLogin: new Date() });
+
+  // Check if user needs to complete shop owner profile
+  const needsShopOwnerProfile = userType === 'SHOP_OWNER';
 
   return res.status(201).json(
     new ApiResponse(201, {
@@ -110,24 +98,132 @@ export const registerUser = asyncHandler(async (req: RegisterRequest, res: Respo
         lastName: user.lastName,
         userType: user.userType,
       },
+      needsShopOwnerProfile,
       accessToken,
       refreshToken,
-    }, 'User registered successfully'),
+    }, 'User registered successfully. Please complete your shop profile.'),
+  );
+});
+
+// Complete Shop Owner Profile - Part 2: Business Details
+export const completeShopOwnerProfile = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user.userId;
+  const {
+    businessName,
+    businessType,
+    businessRegistrationNumber,
+    taxIdentificationNumber,
+    businessAddress,
+    businessCity,
+    businessState,
+    businessZipCode,
+    businessPhone,
+    businessEmail,
+    businessWebsite,
+    businessLogo,
+    bankAccountHolderName,
+    bankAccountNumber,
+    bankBranchCode,
+    bankIfscCode,
+  } = req.body;
+
+  // Validation
+  if (!businessName) {
+    throw new ApiError(400, 'Business name is required');
+  }
+
+  // Find the user
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  // Check if user is a SHOP_OWNER
+  if (user.userType !== 'SHOP_OWNER') {
+    throw new ApiError(403, 'Only shop owners can complete shop profile');
+  }
+
+  // Check if shop owner profile already exists
+  const existingShopOwner = await ShopOwner.findOne({ where: { userId } });
+  if (existingShopOwner) {
+    throw new ApiError(409, 'Shop owner profile already exists');
+  }
+
+  // Create ShopOwner profile (Part 2 - Business details)
+  const shopOwner = await ShopOwner.create({
+    userId,
+    businessName,
+    businessType,
+    businessRegistrationNumber,
+    taxIdentificationNumber,
+    businessAddress,
+    businessCity,
+    businessState,
+    businessZipCode,
+    businessPhone,
+    businessEmail,
+    businessWebsite,
+    businessLogo,
+    bankAccountHolderName,
+    bankAccountNumber,
+    bankBranchCode,
+    bankIfscCode,
+    isVerified: false,
+    isSubscriptionActive: false,
+  });
+
+  // Create a Shop automatically using the business details
+  const shop = await Shop.create({
+    ownerId: shopOwner.ownerId,
+    shopName: businessName,
+    shopType: businessType || 'RETAIL',
+    phoneNumber: businessPhone || '',
+    email: businessEmail || user.email,
+    address: businessAddress || '',
+    city: businessCity || '',
+    state: businessState || '',
+    zipCode: businessZipCode || '',
+    country: 'India', // Default country
+    isActive: true,
+    isVerified: false,
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, {
+      shopOwner: {
+        ownerId: shopOwner.ownerId,
+        userId: shopOwner.userId,
+        businessName: shopOwner.businessName,
+        businessType: shopOwner.businessType,
+        isVerified: shopOwner.isVerified,
+      },
+      shop: {
+        shopId: shop.shopId,
+        shopName: shop.shopName,
+        shopType: shop.shopType,
+      },
+    }, 'Shop owner profile and shop created successfully'),
   );
 });
 
 // Login User
 export const loginUser = asyncHandler(async (req: LoginRequest, res: Response) => {
   const { email, password } = req.body;
+  
+  console.log('📝 Login attempt for:', email);
+  console.log('📝 Request body:', req.body);
+  console.log('📝 Headers:', req.headers);
 
   // Validation
   if (!email || !password) {
+    console.log('❌ Validation failed: Missing email or password');
     throw new ApiError(400, 'Email and password are required');
   }
-console.log(email,password);
 
   // Find user
   const user = await User.findOne({ where: { email } });
+  console.log('👤 User found:', user ? 'Yes' : 'No');
+  
   if (!user) {
     throw new ApiError(401, 'Invalid email or password');
   }
@@ -138,7 +234,12 @@ console.log(email,password);
   }
 
   // Verify password
+  console.log('🔐 Verifying password...');
+  console.log('🔐 Stored hash length:', user.passwordHash.length);
+  console.log('🔐 Stored hash starts with:', user.passwordHash.substring(0, 10));
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  console.log('🔐 Password valid:', isPasswordValid);
+  
   if (!isPasswordValid) {
     throw new ApiError(401, 'Invalid email or password');
   }
@@ -149,6 +250,54 @@ console.log(email,password);
   // Update last login
   await user.update({ lastLogin: new Date() });
 
+  // Get shop IDs if user is a shop owner
+  let shops: any[] = [];
+  let employeeData: any = null;
+  if (user.userType === 'SHOP_OWNER') {
+    const shopOwner = await ShopOwner.findOne({ where: { userId: user.userId } });
+    if (shopOwner) {
+      const userShops = await Shop.findAll({ where: { ownerId: shopOwner.ownerId } });
+      shops = userShops.map(shop => ({
+        shopId: shop.shopId,
+        shopName: shop.shopName,
+        shopType: shop.shopType,
+        isActive: shop.isActive
+      }));
+    }
+  } else if (user.userType === 'EMPLOYEE') {
+    const Employee = (await import('../models/Employee')).default;
+    const employeeRecords = await Employee.findAll({ where: { userId: user.userId, isActive: true } });
+    if (employeeRecords.length > 0) {
+      const shopIds = employeeRecords.map(emp => emp.shopId);
+      const userShops = await Shop.findAll({ where: { shopId: shopIds } });
+      shops = userShops.map(shop => ({
+        shopId: shop.shopId,
+        shopName: shop.shopName,
+        shopType: shop.shopType,
+        isActive: shop.isActive
+      }));
+      
+      // Get the first active employee record
+      const employeeRecord = employeeRecords[0];
+      
+      // Import DEFAULT_PERMISSIONS for fallback
+      const { DEFAULT_PERMISSIONS } = await import('../models/Employee');
+      
+      // Use custom permissions if set, otherwise use default based on staffRole
+      const permissions = employeeRecord.permissions || DEFAULT_PERMISSIONS[employeeRecord.staffRole] || DEFAULT_PERMISSIONS['Staff'];
+      
+      employeeData = {
+        employeeId: employeeRecord.employeeId,
+        designation: employeeRecord.designation,
+        employeeType: employeeRecord.employeeType,
+        staffRole: employeeRecord.staffRole,
+        permissions: permissions
+      };
+    }
+  }
+
+  console.log('✅ Login successful for:', email);
+
   return res.status(200).json(
     new ApiResponse(200, {
       user: {
@@ -157,7 +306,13 @@ console.log(email,password);
         firstName: user.firstName,
         lastName: user.lastName,
         userType: user.userType,
+        ...(employeeData && { 
+          designation: employeeData.designation, 
+          employeeType: employeeData.employeeType,
+          staffRole: employeeData.staffRole
+        })
       },
+      shops,
       accessToken,
       refreshToken,
     }, 'Login successful'),

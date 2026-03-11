@@ -1,0 +1,134 @@
+<div class="order-details">
+  <div class="page-header">
+    <a routerLink="/my-orders" class="back-link">← Back to Orders</a>
+    <h1>Order Details</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading order...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-state">
+      <span class="error-icon">⚠️</span>
+      <h3>{{ error() }}</h3>
+      <a routerLink="/my-orders" class="btn-primary">View All Orders</a>
+    </div>
+  }
+
+  @if (!loading() && order()) {
+    <div class="order-detail-card">
+      <!-- Order Header -->
+      <div class="order-header">
+        <div class="order-info">
+          <span class="order-number">{{ order()?.orderNumber }}</span>
+          <span class="order-date">{{ order()?.createdAt | date:'medium' }}</span>
+        </div>
+        <span class="order-status" [class]="getStatusClass(order()?.orderStatus || '')">
+          {{ order()?.orderStatus }}
+        </span>
+      </div>
+
+      <!-- Shop Info -->
+      <div class="section">
+        <h3>Shop Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Shop Name</span>
+            <span class="value">{{ order()?.shop?.shopName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Location</span>
+            <span class="value">{{ order()?.shop?.city }}, {{ order()?.shop?.state }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="section">
+        <h3>Order Items</h3>
+        <div class="items-list">
+          @for (item of order()?.items; track item.orderItemId) {
+            <div class="item-row">
+              <div class="item-image">
+                @if (item.product?.imageUrl) {
+                  <img [src]="item.product.imageUrl" [alt]="item.productName">
+                } @else {
+                  <div class="placeholder-image">📦</div>
+                }
+              </div>
+              <div class="item-info">
+                <span class="item-name">{{ item.productName }}</span>
+                @if (item.productCode) {
+                  <span class="item-code">Code: {{ item.productCode }}</span>
+                }
+                <span class="item-price">₹{{ item.unitPrice?.toLocaleString('en-IN') }} × {{ item.quantity }}</span>
+              </div>
+              <div class="item-total">
+                ₹{{ item.totalPrice?.toLocaleString('en-IN') }}
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="section summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>₹{{ order()?.subtotal?.toLocaleString('en-IN') }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax</span>
+          <span>₹{{ order()?.taxAmount?.toLocaleString('en-IN') }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Discount</span>
+          <span>-₹{{ order()?.discountAmount?.toLocaleString('en-IN') }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>₹{{ order()?.totalAmount?.toLocaleString('en-IN') }}</span>
+        </div>
+      </div>
+
+      <!-- Payment Info -->
+      <div class="section">
+        <h3>Payment Details</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Payment Method</span>
+            <span class="value">{{ order()?.paymentMethod || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Payment Status</span>
+            <span class="value">{{ order()?.paymentStatus }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Info -->
+      @if (order()?.deliveryAddress) {
+        <div class="section">
+          <h3>Delivery Address</h3>
+          <p class="address">{{ order()?.deliveryAddress }}</p>
+          @if (order()?.deliveryCity || order()?.deliveryPincode) {
+            <p class="address">{{ order()?.deliveryCity }} - {{ order()?.deliveryPincode }}</p>
+          }
+        </div>
+      }
+
+      <!-- Notes -->
+      @if (order()?.customerNotes) {
+        <div class="section">
+          <h3>Order Notes</h3>
+          <p class="notes">{{ order()?.customerNotes }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+

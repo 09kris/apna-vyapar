@@ -1,0 +1,457 @@
+<div class="order-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn-back" routerLink="/orders">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back
+      </button>
+      <h1>{{ isEditMode() ? 'Edit Order' : 'Create New Order' }}</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="saveDraft()" [disabled]="saving() || orderItems().length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        Save Draft
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div class="toast toast-error" *ngIf="error()" (click)="clearError()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      {{ error() }}
+    </div>
+    <div class="toast toast-success" *ngIf="successMessage()" (click)="clearSuccess()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      {{ successMessage() }}
+    </div>
+  </div>
+
+  <div class="form-content" *ngIf="!loading(); else loadingTpl">
+    <div class="form-layout">
+      <!-- Left Column - Main Form -->
+      <div class="form-main">
+        <!-- Customer & Order Type Section -->
+        <div class="form-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <h3>Customer & Order Details</h3>
+          </div>
+          
+          <div class="card-body">
+            <div class="form-row">
+              <!-- Customer Selection -->
+              <div class="form-group">
+                <label>Select Customer <span class="required">*</span></label>
+                
+                <div class="customer-selector" *ngIf="!selectedCustomer()">
+                  <div class="search-dropdown" [class.open]="customerDropdownOpen()">
+                    <div class="search-input-wrapper">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                      <input 
+                        type="text" 
+                        [(ngModel)]="customerSearchQuery"
+                        (input)="onCustomerSearch()"
+                        (focus)="toggleCustomerDropdown()"
+                        placeholder="Search by name, phone, or email..."
+                        class="search-input"
+                      />
+                    </div>
+                    <div class="dropdown-list" *ngIf="customerDropdownOpen()">
+                      <div 
+                        class="dropdown-item" 
+                        *ngFor="let customer of filteredCustomers()"
+                        (click)="selectCustomer(customer)"
+                      >
+                        <div class="customer-avatar">
+                          {{ customer.fullName.charAt(0).toUpperCase() }}
+                        </div>
+                        <div class="customer-details">
+                          <span class="customer-name">{{ customer.fullName }}</span>
+                          <span class="customer-meta">
+                            {{ customer.phone }}
+                            <span class="badge" *ngIf="customer.customerType">{{ customer.customerType }}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="no-results" *ngIf="filteredCustomers().length === 0 && customerSearchQuery()">
+                        No customers found
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="selected-customer" *ngIf="selectedCustomer()">
+                  <div class="customer-info-card">
+                    <div class="customer-avatar large">
+                      {{ selectedCustomer()!.fullName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="customer-info-content">
+                      <strong>{{ selectedCustomer()!.fullName }}</strong>
+                      <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        {{ selectedCustomer()!.phone }}
+                      </span>
+                      <span *ngIf="selectedCustomer()!.email">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                          <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        {{ selectedCustomer()!.email }}
+                      </span>
+                    </div>
+                    <button class="btn-clear" (click)="clearCustomer()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Type -->
+              <div class="form-group">
+                <label>Order Type <span class="required">*</span></label>
+                <div class="order-type-selector">
+                  <button 
+                    class="type-btn" 
+                    [class.active]="orderType() === 'RETAIL'"
+                    (click)="orderType.set('RETAIL'); onOrderTypeChange()"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    Retail
+                  </button>
+                  <button 
+                    class="type-btn" 
+                    [class.active]="orderType() === 'WHOLESALE'"
+                    (click)="orderType.set('WHOLESALE'); onOrderTypeChange()"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Wholesale
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="form-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <h3>Order Items</h3>
+            <span class="item-count">{{ itemCount() }} items</span>
+          </div>
+          
+          <div class="card-body">
+            <div class="add-product-row">
+              <button class="btn-add-product" (click)="openProductSelector()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Product
+              </button>
+            </div>
+
+            <!-- Order Items Table -->
+            <div class="order-items-table" *ngIf="orderItems().length > 0">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="product-col">Product</th>
+                    <th class="price-col">Price</th>
+                    <th class="qty-col">Qty</th>
+                    <th class="discount-col">Discount %</th>
+                    <th class="tax-col">Tax %</th>
+                    <th class="total-col">Total</th>
+                    <th class="action-col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of orderItems()">
+                    <td class="product-cell">
+                      <div class="product-image" *ngIf="item.productImage">
+                        <img [src]="item.productImage" [alt]="item.productName">
+                      </div>
+                      <div class="product-image placeholder" *ngIf="!item.productImage">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                          <line x1="3" y1="6" x2="21" y2="6"></line>
+                          <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                      </div>
+                      <div class="product-info">
+                        <span class="product-name">{{ item.productName }}</span>
+                        <span class="product-code" *ngIf="item.productCode">{{ item.productCode }}</span>
+                        <span class="stock-info" [class.low-stock]="item.availableStock < 10">
+                          Stock: {{ item.availableStock }}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <input 
+                        type="number" 
+                        [ngModel]="item.unitPrice"
+                        (ngModelChange)="updateUnitPrice(item.id, $event)"
+                        class="qty-input"
+                        min="0"
+                        step="0.01"
+                      />
+                    </td>
+                    <td>
+                      <input 
+                        type="number" 
+                        [ngModel]="item.quantity"
+                        (ngModelChange)="updateQuantity(item.id, $event)"
+                        class="qty-input"
+                        min="1"
+                        [max]="item.availableStock"
+                      />
+                    </td>
+                    <td>
+                      <input 
+                        type="number" 
+                        [ngModel]="item.discountPercentage"
+                        (ngModelChange)="updateDiscount(item.id, $event)"
+                        class="qty-input"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                      />
+                    </td>
+                    <td>
+                      <span class="tax-value">{{ item.taxPercentage }}%</span>
+                    </td>
+                    <td class="item-total">
+                      ₹{{ item.totalPrice | number:'1.2-2' }}
+                    </td>
+                    <td>
+                      <button class="btn-remove" (click)="removeProduct(item.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="no-items" *ngIf="orderItems().length === 0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <p>No products added yet</p>
+              <span>Click "Add Product" to add items to this order</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="form-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <h3>Notes</h3>
+          </div>
+          
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Customer Notes</label>
+                <textarea 
+                  [(ngModel)]="customerNotes"
+                  placeholder="Notes for the customer..."
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label>Internal Notes</label>
+                <textarea 
+                  [(ngModel)]="internalNotes"
+                  placeholder="Internal notes (not visible to customer)..."
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Order Summary -->
+      <div class="form-sidebar">
+        <div class="summary-card sticky">
+          <div class="summary-header">
+            <h3>Order Summary</h3>
+          </div>
+          
+          <div class="summary-body">
+            <div class="summary-row">
+              <span>Subtotal ({{ itemCount() }} items)</span>
+              <span>₹{{ subtotal() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row discount" *ngIf="totalDiscount() > 0">
+              <span>Discount</span>
+              <span>- ₹{{ totalDiscount() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Tax</span>
+              <span>₹{{ totalTax() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row grand-total">
+              <span>Grand Total</span>
+              <span>₹{{ grandTotal() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button class="btn-cancel" (click)="cancel()" [disabled]="saving()">
+              Cancel
+            </button>
+            <button class="btn-submit" (click)="onSubmit()" [disabled]="saving()">
+              <span *ngIf="!saving()">{{ isEditMode() ? 'Update Order' : 'Create Order' }}</span>
+              <span *ngIf="saving()">
+                <span class="spinner-small"></span>
+                {{ isEditMode() ? 'Updating...' : 'Creating...' }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Template -->
+  <ng-template #loadingTpl>
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </ng-template>
+
+  <!-- Product Selector Modal -->
+  <div class="modal-overlay" *ngIf="showProductSelector()" (click)="closeProductSelector()">
+    <div class="modal-content product-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Select Product</h3>
+        <button class="btn-close" (click)="closeProductSelector()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            [(ngModel)]="productSearchQuery"
+            (input)="onProductSearch()"
+            placeholder="Search products by name or code..."
+            class="search-input"
+            autofocus
+          />
+        </div>
+
+        <div class="products-list">
+          <div 
+            class="product-item" 
+            *ngFor="let product of filteredProducts()"
+            (click)="addProduct(product)"
+          >
+            <div class="product-image" *ngIf="product.imageUrl">
+              <img [src]="product.imageUrl" [alt]="product.productName">
+            </div>
+            <div class="product-image placeholder" *ngIf="!product.imageUrl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+            <div class="product-info">
+              <span class="product-name">{{ product.productName }}</span>
+              <span class="product-code" *ngIf="product.productCode">{{ product.productCode }}</span>
+            </div>
+            <div class="product-prices">
+              <div class="price" *ngIf="orderType() === 'RETAIL'">
+                <span class="label">Retail</span>
+                <span class="value">₹{{ product.retailPrice }}</span>
+              </div>
+              <div class="price" *ngIf="orderType() === 'WHOLESALE'">
+                <span class="label">Wholesale</span>
+                <span class="value">₹{{ product.wholesalePrice }}</span>
+              </div>
+              <div class="stock" [class.low-stock]="(product.stockQuantity || 0) < 10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                {{ product.stockQuantity || 0 }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="no-results" *ngIf="filteredProducts().length === 0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <p>No products found</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Shop from '../models/Shop';
 import ShopOwner from '../models/ShopOwner';
 import User from '../models/User';
+import CustomFormField from '../models/CustomFormField';
 import ApiError from '../utils/ApiError';
 import ApiResponse from '../utils/ApiResponse';
 import asyncHandler from '../utils/AsyncHandler';
@@ -48,6 +49,7 @@ export const addShop = asyncHandler(async (req: AddShopRequest, res: Response) =
   if (!userId) {
     throw new ApiError(401, 'Not authenticated');
   }
+// console.log("hello");
 
   // Check if user is a shop owner
   const user = await User.findByPk(userId);
@@ -113,7 +115,7 @@ export const addShop = asyncHandler(async (req: AddShopRequest, res: Response) =
   );
 });
 
-// Get All Shops for Shop Owner
+// Get All Shops for Shop Owner or Employee
 export const getMyShops = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user?.userId;
 
@@ -121,15 +123,46 @@ export const getMyShops = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, 'Not authenticated');
   }
 
-  const shopOwner = await ShopOwner.findOne({ where: { userId } });
-  if (!shopOwner) {
-    throw new ApiError(404, 'Shop owner profile not found');
+  // Find the user to determine their type
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
   }
 
-  const shops = await Shop.findAll({
-    where: { ownerId: shopOwner.ownerId },
-    order: [['createdAt', 'DESC']],
-  });
+  let shops: any[] = [];
+
+  if (user.userType === 'SHOP_OWNER') {
+    // For shop owners, get their owned shops
+    const shopOwner = await ShopOwner.findOne({ where: { userId } });
+    if (!shopOwner) {
+      throw new ApiError(404, 'Shop owner profile not found');
+    }
+
+    shops = await Shop.findAll({
+      where: { ownerId: shopOwner.ownerId },
+      order: [['createdAt', 'DESC']],
+    });
+  } else if (user.userType === 'EMPLOYEE') {
+    // For employees, get their assigned shops from the Employee table
+    const Employee = (await import('../models/Employee')).default;
+    const employeeRecords = await Employee.findAll({ 
+      where: { userId, isActive: true } 
+    });
+    
+    if (employeeRecords.length === 0) {
+      throw new ApiError(404, 'No employee record found');
+    }
+
+    // Get the shop IDs the employee is assigned to
+    const shopIds = employeeRecords.map(emp => emp.shopId);
+    
+    shops = await Shop.findAll({
+      where: { shopId: shopIds },
+      order: [['createdAt', 'DESC']],
+    });
+  } else {
+    throw new ApiError(403, 'Unauthorized access to shops');
+  }
 
   return res.status(200).json(
     new ApiResponse(200, shops, 'Shops retrieved successfully'),
@@ -150,7 +183,7 @@ export const getShopById = asyncHandler(async (req: Request, res: Response) => {
   );
 });
 
-// Update Shop
+// Update Shop - accessible by both SHOP_OWNER and EMPLOYEE
 export const updateShop = asyncHandler(async (req: UpdateShopRequest, res: Response) => {
   const userId = (req as any).user?.userId;
   const { shopId } = (req as any).params;
@@ -164,13 +197,59 @@ export const updateShop = asyncHandler(async (req: UpdateShopRequest, res: Respo
     throw new ApiError(404, 'Shop not found');
   }
 
-  // Verify ownership
-  const shopOwner = await ShopOwner.findOne({ where: { userId } });
-  if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
-    throw new ApiError(403, 'Unauthorized: You can only update your own shops');
+  // Find the user to determine their type
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
   }
 
-  // Update shop details
+  if (user.userType === 'SHOP_OWNER') {
+    // Verify ownership for shop owners
+    const shopOwner = await ShopOwner.findOne({ where: { userId } });
+    if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
+      throw new ApiError(403, 'Unauthorized: You can only update your own shops');
+    }
+  } else if (user.userType === 'EMPLOYEE') {
+    // For employees, verify they are assigned to this shop
+    const Employee = (await import('../models/Employee')).default;
+    const employee = await Employee.findOne({ 
+      where: { userId, shopId, isActive: true } 
+    });
+    
+    if (!employee) {
+      throw new ApiError(403, 'You are not assigned to this shop');
+    }
+    
+    // Employees can only update certain fields (not ownership-related)
+    const allowedFieldsForEmployee: (keyof typeof req.body)[] = [
+      'shopName', 'shopDescription', 'phoneNumber', 'email', 
+      'address', 'city', 'state', 'zipCode', 'businessHoursStart', 
+      'businessHoursEnd'
+    ];
+    
+    // Filter out any fields that employees shouldn't be able to update
+    const filteredBody: any = {};
+    for (const key of allowedFieldsForEmployee) {
+      if (req.body[key] !== undefined) {
+        filteredBody[key] = req.body[key];
+      }
+    }
+    
+    await shop.update(filteredBody);
+    
+    return res.status(200).json(
+      new ApiResponse(200, {
+        shopId: shop.shopId,
+        shopName: shop.shopName,
+        email: shop.email,
+        city: shop.city,
+      }, 'Shop updated successfully'),
+    );
+  } else {
+    throw new ApiError(403, 'Unauthorized');
+  }
+
+  // Update shop details (for shop owners)
   await shop.update(req.body);
 
   return res.status(200).json(
@@ -240,7 +319,7 @@ export const toggleShopStatus = asyncHandler(async (req: Request, res: Response)
   );
 });
 
-// Get Shop Statistics
+// Get Shop Statistics - accessible by both SHOP_OWNER and EMPLOYEE
 export const getShopStats = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user?.userId;
   const { shopId } = (req as any).params;
@@ -254,9 +333,29 @@ export const getShopStats = asyncHandler(async (req: Request, res: Response) => 
     throw new ApiError(404, 'Shop not found');
   }
 
-  // Verify ownership
-  const shopOwner = await ShopOwner.findOne({ where: { userId } });
-  if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
+  // Find the user to determine their type
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (user.userType === 'SHOP_OWNER') {
+    // Verify ownership for shop owners
+    const shopOwner = await ShopOwner.findOne({ where: { userId } });
+    if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
+      throw new ApiError(403, 'Unauthorized');
+    }
+  } else if (user.userType === 'EMPLOYEE') {
+    // For employees, verify they are assigned to this shop
+    const Employee = (await import('../models/Employee')).default;
+    const employee = await Employee.findOne({ 
+      where: { userId, shopId, isActive: true } 
+    });
+    
+    if (!employee) {
+      throw new ApiError(403, 'You are not assigned to this shop');
+    }
+  } else {
     throw new ApiError(403, 'Unauthorized');
   }
 
@@ -313,5 +412,116 @@ export const updateShopReferenceCode = asyncHandler(async (req: Request, res: Re
       },
       'Reference code updated successfully',
     ),
+  );
+});
+
+// Configure Shop Fields - Allow shop owners to configure which fields are enabled
+export const configureShopFields = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
+  const { shopId } = (req as any).params;
+  const { fields } = req.body;
+
+  if (!userId) {
+    throw new ApiError(401, 'Not authenticated');
+  }
+
+  if (!fields || !Array.isArray(fields)) {
+    throw new ApiError(400, 'Fields array is required');
+  }
+
+  const shop = await Shop.findByPk(shopId);
+  if (!shop) {
+    throw new ApiError(404, 'Shop not found');
+  }
+
+  // Verify ownership
+  const shopOwner = await ShopOwner.findOne({ where: { userId } });
+  if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
+    throw new ApiError(403, 'Unauthorized: You can only configure your own shop');
+  }
+
+  // Check if configuration already exists
+  let fieldConfig = await CustomFormField.findOne({
+    where: { shopId, tableName: 'shops' }
+  });
+
+  if (fieldConfig) {
+    // Update existing configuration
+    await fieldConfig.update({
+      fields: JSON.stringify(fields),
+      updatedBy: userId
+    });
+  } else {
+    // Create new configuration
+    fieldConfig = await CustomFormField.create({
+      shopId,
+      tableName: 'shops',
+      fields: JSON.stringify(fields),
+      status: 'ACTIVE',
+      createdBy: userId,
+      updatedBy: userId
+    });
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      fieldId: fieldConfig.fieldId,
+      shopId: fieldConfig.shopId,
+      fields: fields
+    }, 'Shop fields configuration saved successfully')
+  );
+});
+
+// Get Shop Field Configuration
+export const getShopFieldConfiguration = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
+  const { shopId } = (req as any).params;
+
+  if (!userId) {
+    throw new ApiError(401, 'Not authenticated');
+  }
+
+  const shop = await Shop.findByPk(shopId);
+  if (!shop) {
+    throw new ApiError(404, 'Shop not found');
+  }
+
+  // Verify ownership
+  const shopOwner = await ShopOwner.findOne({ where: { userId } });
+  if (!shopOwner || shop.ownerId !== shopOwner.ownerId) {
+    throw new ApiError(403, 'Unauthorized: You can only view your own shop configuration');
+  }
+
+  // Get field configuration
+  const fieldConfig = await CustomFormField.findOne({
+    where: { shopId, tableName: 'shops' }
+  });
+
+  if (!fieldConfig) {
+    return res.status(200).json(
+      new ApiResponse(200, {
+        shopId,
+        fields: []
+      }, 'No field configuration found')
+    );
+  }
+
+  // Parse fields if stored as string
+  let parsedFields: string | string[] = fieldConfig.fields;
+  if (typeof fieldConfig.fields === 'string') {
+    try {
+      parsedFields = JSON.parse(fieldConfig.fields);
+    } catch (e) {
+      parsedFields = [];
+    }
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      fieldId: fieldConfig.fieldId,
+      shopId: fieldConfig.shopId,
+      fields: parsedFields,
+      status: fieldConfig.status
+    }, 'Shop field configuration retrieved successfully')
   );
 });

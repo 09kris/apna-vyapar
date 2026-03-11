@@ -1,0 +1,180 @@
+<div class="customers-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Customers</h1>
+      <p class="page-subtitle">Manage your customer database</p>
+    </div>
+    <div class="header-right">
+      <a routerLink="/customers/add" class="btn btn-primary">
+        <span class="btn-icon">➕</span>
+        Add Customer
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    @for (stat of stats(); track stat.title) {
+      <div class="stat-card" [style.border-left-color]="stat.color">
+        <div class="stat-icon">{{ stat.icon }}</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-title">{{ stat.title }}</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Search customers..." 
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        (keyup.enter)="onSearch()"
+        class="search-input"
+      >
+    </div>
+    <div class="filter-buttons">
+      <button 
+        class="filter-btn" 
+        [class.active]="customerTypeFilter() === ''"
+        (click)="filterByType('')"
+      >
+        All
+      </button>
+      <button 
+        class="filter-btn" 
+        [class.active]="customerTypeFilter() === 'Retail'"
+        (click)="filterByType('Retail')"
+      >
+        🛒 Retail
+      </button>
+      <button 
+        class="filter-btn" 
+        [class.active]="customerTypeFilter() === 'Wholesale'"
+        (click)="filterByType('Wholesale')"
+      >
+        🏢 Wholesale
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading customers...</p>
+    </div>
+  }
+
+  <!-- Customers Table -->
+  @if (!loading()) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Type</th>
+            <th>Company</th>
+            <th>Total Purchases</th>
+            <th>Loyalty Points</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of customers(); track customer.id) {
+            <tr>
+              <td>
+                <div class="customer-name">
+<span class="avatar">{{ customer.fullName ? customer.fullName.charAt(0).toUpperCase() : '?' }}</span>
+                  <div class="customer-info">
+                    <span class="name">{{ customer.fullName }}</span>
+                    <span class="phone">{{ customer.phone }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  @if (customer.email) {
+                    <span class="email">{{ customer.email }}</span>
+                  }
+                  <span class="phone">{{ customer.phone }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [class.retail]="customer.customerType === 'Retail'" [class.wholesale]="customer.customerType === 'Wholesale'">
+                  {{ customer.customerType }}
+                </span>
+              </td>
+              <td>{{ customer.companyName || '-' }}</td>
+              <td>₹{{ (customer.totalPurchases || 0).toLocaleString('en-IN') }}</td>
+              <td>{{ customer.loyaltyPoints || 0 }}</td>
+              <td>
+                @if (customer.isBlacklisted) {
+                  <span class="status-badge blacklisted">Blacklisted</span>
+                } @else if (customer.isActive) {
+                  <span class="status-badge active">Active</span>
+                } @else {
+                  <span class="status-badge inactive">Inactive</span>
+                }
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <a [routerLink]="['/customers', customer.id]" class="btn-icon-action view" title="View">
+                    👁️
+                  </a>
+                  <a [routerLink]="['/customers', customer.id, 'edit']" class="btn-icon-action edit" title="Edit">
+                    ✏️
+                  </a>
+                  <button class="btn-icon-action delete" (click)="deleteCustomer(customer.id)" title="Delete">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-content">
+                  <span class="empty-icon">👥</span>
+                  <h3>No customers found</h3>
+                  <p>Start adding customers to manage your database</p>
+                  <a routerLink="/customers/add" class="btn btn-primary">Add Customer</a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentPage() === 1"
+        (click)="prevPage()"
+      >
+        ← Previous
+      </button>
+      <span class="pagination-info">
+        Page {{ currentPage() }} of {{ totalPages() }}
+      </span>
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentPage() === totalPages()"
+        (click)="nextPage()"
+      >
+        Next →
+      </button>
+    </div>
+  }
+</div>

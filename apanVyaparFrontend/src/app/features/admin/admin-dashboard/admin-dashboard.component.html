@@ -1,0 +1,203 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">Manage all your shops from one place</p>
+  </div>
+
+  <!-- Overview Stats -->
+  <div class="overview-cards">
+    <div class="overview-card">
+      <div class="card-icon shops">
+        <span class="icon">🏪</span>
+      </div>
+      <div class="card-content">
+        <h3>{{ totalShops() }}</h3>
+        <p>Total Shops</p>
+      </div>
+    </div>
+    
+    <div class="overview-card">
+      <div class="card-icon revenue">
+        <span class="icon">💰</span>
+      </div>
+      <div class="card-content">
+        <h3>{{ formatCurrency(totalRevenue()) }}</h3>
+        <p>Total Revenue</p>
+      </div>
+    </div>
+    
+    <div class="overview-card">
+      <div class="card-icon orders">
+        <span class="icon">📦</span>
+      </div>
+      <div class="card-content">
+        <h3>{{ totalOrders() }}</h3>
+        <p>Total Orders</p>
+      </div>
+    </div>
+    
+    <div class="overview-card">
+      <div class="card-icon customers">
+        <span class="icon">👥</span>
+      </div>
+      <div class="card-content">
+        <h3>{{ totalCustomers() }}</h3>
+        <p>Total Customers</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <div class="chart-card">
+      <h3>Revenue Trend</h3>
+      <div class="chart-container">
+        <canvas #revenueChart></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Shop Distribution</h3>
+      <div class="chart-container">
+        <canvas #shopsChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shops Grid -->
+  <div class="shops-section">
+    <div class="section-header">
+      <h2>Your Shops</h2>
+      <a routerLink="/shops/add" class="btn-add">
+        <span>+</span> Add New Shop
+      </a>
+    </div>
+
+    @if (loading()) {
+      <div class="loading">Loading shops...</div>
+    } @else {
+      <div class="shops-grid">
+        @for (shop of shops(); track shop.shopId) {
+          <div class="shop-card" (click)="selectShop(shop)">
+            <div class="shop-header">
+              <div class="shop-icon">{{ getShopTypeIcon(shop.shopType) }}</div>
+              <div class="shop-status" [class]="getStatusClass(shop.isActive)">
+                {{ shop.isActive ? 'Active' : 'Inactive' }}
+              </div>
+            </div>
+            
+            <div class="shop-body">
+              <h3 class="shop-name">{{ shop.shopName }}</h3>
+              <p class="shop-location">
+                <span class="icon">📍</span>
+                {{ shop.city }}, {{ shop.state }}
+              </p>
+              <p class="shop-type">{{ shop.shopType }}</p>
+            </div>
+            
+            <div class="shop-stats">
+              <div class="stat">
+                <span class="value">{{ shop.totalProducts || 0 }}</span>
+                <span class="label">Products</span>
+              </div>
+              <div class="stat">
+                <span class="value">{{ shop.totalOrders || 0 }}</span>
+                <span class="label">Orders</span>
+              </div>
+              <div class="stat">
+                <span class="value">{{ shop.totalCustomers || 0 }}</span>
+                <span class="label">Customers</span>
+              </div>
+            </div>
+            
+            <div class="shop-actions">
+              <button class="btn-switch">Manage Shop</button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <div class="empty-icon">🏪</div>
+            <h3>No shops yet</h3>
+            <p>Create your first shop to get started</p>
+            <a routerLink="/shops/add" class="btn-primary">Create Shop</a>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/products" class="action-card">
+        <span class="action-icon">📦</span>
+        <span class="action-label">Manage Products</span>
+      </a>
+      <a routerLink="/customers" class="action-card">
+        <span class="action-icon">👥</span>
+        <span class="action-label">Manage Customers</span>
+      </a>
+      <a routerLink="/employees" class="action-card">
+        <span class="action-icon">👤</span>
+        <span class="action-label">Manage Staff</span>
+      </a>
+      <a routerLink="/inventory" class="action-card">
+        <span class="action-icon">📈</span>
+        <span class="action-label">View Inventory</span>
+      </a>
+      <a routerLink="/orders" class="action-card">
+        <span class="action-icon">🛒</span>
+        <span class="action-label">View Orders</span>
+      </a>
+      <a routerLink="/settings" class="action-card">
+        <span class="action-icon">⚙️</span>
+        <span class="action-label">Settings</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Shop Details Modal -->
+@if (showShopModal() && selectedShop()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ selectedShop()?.shopName }}</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="shop-details">
+          <div class="detail-row">
+            <span class="label">Type:</span>
+            <span class="value">{{ selectedShop()?.shopType }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Location:</span>
+            <span class="value">{{ selectedShop()?.city }}, {{ selectedShop()?.state }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Phone:</span>
+            <span class="value">{{ selectedShop()?.phone }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ selectedShop()?.email || 'Not set' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">GST Number:</span>
+            <span class="value">{{ selectedShop()?.gstNumber || 'Not set' }}</span>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn-primary" (click)="switchToShop(selectedShop()!)">
+            Switch to This Shop
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

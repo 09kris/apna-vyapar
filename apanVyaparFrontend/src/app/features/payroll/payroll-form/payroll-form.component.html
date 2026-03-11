@@ -1,0 +1,512 @@
+<div class="payroll-form-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      @if (mode() === 'create') {
+        Generate Payroll
+      } @else if (mode() === 'pay') {
+        Mark as Paid
+      } @else {
+        Payroll Details
+      }
+    </h1>
+    <button class="btn btn-outline" (click)="goBack()">
+      ← Back to Payroll List
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <div class="form-container">
+      @if (mode() !== 'view') {
+        <!-- Shop Selection (only for create mode) -->
+        @if (mode() === 'create') {
+          <div class="form-section">
+            <h3>Select Shop</h3>
+            <div class="form-group">
+              <label for="shop">Shop</label>
+              <select 
+                id="shop" 
+                [ngModel]="shopId()" 
+                (ngModelChange)="shopId.set($event); onShopChange()"
+                class="form-control">
+                <option value="">Select Shop</option>
+                @for (shop of shops(); track shop.shopId) {
+                  <option [value]="shop.shopId">{{ shop.shopName }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Employee & Month Selection -->
+          <div class="form-section">
+            <h3>Employee & Period</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="employee">Employee</label>
+                <select 
+                  id="employee" 
+                  [ngModel]="selectedEmployeeId()" 
+                  (ngModelChange)="selectedEmployeeId.set($event); onEmployeeChange()"
+                  class="form-control">
+                  <option value="">Select Employee</option>
+                  @for (employee of employees(); track employee.employeeId) {
+                    <option [value]="employee.employeeId">
+                      {{ employee.firstName }} {{ employee.lastName }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="salaryMonth">Salary Month</label>
+                <select 
+                  id="salaryMonth" 
+                  [ngModel]="salaryMonth()" 
+                  (ngModelChange)="salaryMonth.set($event)"
+                  class="form-control">
+                  @for (month of getMonths(); track month.value) {
+                    <option [value]="month.value">{{ month.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Earnings -->
+        <div class="form-section">
+          <h3>Earnings</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="basicSalary">Basic Salary (₹)</label>
+              <input 
+                type="number" 
+                id="basicSalary" 
+                [ngModel]="basicSalary()" 
+                (ngModelChange)="basicSalary.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="hra">HRA (₹)</label>
+              <input 
+                type="number" 
+                id="hra" 
+                [ngModel]="hra()" 
+                (ngModelChange)="hra.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="medicalAllowance">Medical Allowance (₹)</label>
+              <input 
+                type="number" 
+                id="medicalAllowance" 
+                [ngModel]="medicalAllowance()" 
+                (ngModelChange)="medicalAllowance.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="transportAllowance">Transport Allowance (₹)</label>
+              <input 
+                type="number" 
+                id="transportAllowance" 
+                [ngModel]="transportAllowance()" 
+                (ngModelChange)="transportAllowance.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="otherAllowances">Other Allowances (₹)</label>
+              <input 
+                type="number" 
+                id="otherAllowances" 
+                [ngModel]="otherAllowances()" 
+                (ngModelChange)="otherAllowances.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="bonus">Bonus (₹)</label>
+              <input 
+                type="number" 
+                id="bonus" 
+                [ngModel]="bonus()" 
+                (ngModelChange)="bonus.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- Deductions -->
+        <div class="form-section">
+          <h3>Deductions</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfDeduction">PF Deduction (₹)</label>
+              <input 
+                type="number" 
+                id="pfDeduction" 
+                [ngModel]="pfDeduction()" 
+                (ngModelChange)="pfDeduction.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="taxDeduction">Tax Deduction (₹)</label>
+              <input 
+                type="number" 
+                id="taxDeduction" 
+                [ngModel]="taxDeduction()" 
+                (ngModelChange)="taxDeduction.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label for="loanDeduction">Loan Deduction (₹)</label>
+              <input 
+                type="number" 
+                id="loanDeduction" 
+                [ngModel]="loanDeduction()" 
+                (ngModelChange)="loanDeduction.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="otherDeductions">Other Deductions (₹)</label>
+              <input 
+                type="number" 
+                id="otherDeductions" 
+                [ngModel]="otherDeductions()" 
+                (ngModelChange)="otherDeductions.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- Working Days -->
+        <div class="form-section">
+          <h3>Working Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="workingDays">Working Days</label>
+              <input 
+                type="number" 
+                id="workingDays" 
+                [ngModel]="workingDays()" 
+                (ngModelChange)="workingDays.set($event); onFieldChange()"
+                class="form-control"
+                min="0">
+            </div>
+
+            <div class="form-group">
+              <label for="leaveDays">Leave Days</label>
+              <input 
+                type="number" 
+                id="leaveDays" 
+                [ngModel]="leaveDays()" 
+                (ngModelChange)="leaveDays.set($event); onFieldChange()"
+                class="form-control"
+                min="0">
+            </div>
+
+            <div class="form-group">
+              <label for="overtimeHours">Overtime Hours</label>
+              <input 
+                type="number" 
+                id="overtimeHours" 
+                [ngModel]="overtimeHours()" 
+                (ngModelChange)="overtimeHours.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.5">
+            </div>
+
+            <div class="form-group">
+              <label for="overtimeAmount">Overtime Amount (₹)</label>
+              <input 
+                type="number" 
+                id="overtimeAmount" 
+                [ngModel]="overtimeAmount()" 
+                (ngModelChange)="overtimeAmount.set($event); onFieldChange()"
+                class="form-control"
+                min="0"
+                step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Details (for pay mode) -->
+        @if (mode() === 'pay') {
+          <div class="form-section">
+            <h3>Payment Details</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="paymentDate">Payment Date</label>
+                <input 
+                  type="date" 
+                  id="paymentDate" 
+                  [ngModel]="paymentDate()" 
+                  (ngModelChange)="paymentDate.set($event)"
+                  class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="paymentMode">Payment Mode</label>
+                <select 
+                  id="paymentMode" 
+                  [ngModel]="paymentMode()" 
+                  (ngModelChange)="paymentMode.set($event)"
+                  class="form-control">
+                  <option value="CASH">Cash</option>
+                  <option value="BANK_TRANSFER">Bank Transfer</option>
+                  <option value="UPI">UPI</option>
+                  <option value="CHEQUE">Cheque</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentReference">Payment Reference</label>
+                <input 
+                  type="text" 
+                  id="paymentReference" 
+                  [ngModel]="paymentReference()" 
+                  (ngModelChange)="paymentReference.set($event)"
+                  class="form-control"
+                  placeholder="Transaction ID / Cheque No.">
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Summary -->
+        <div class="form-section summary-section">
+          <h3>Salary Summary</h3>
+          <div class="summary-row">
+            <span>Gross Salary:</span>
+            <span class="amount">₹{{ grossSalary() | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Total Deductions:</span>
+            <span class="amount deduction">-₹{{ totalDeductions() | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Net Salary:</span>
+            <span class="amount">₹{{ netSalary() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <!-- Error/Success Messages -->
+        @if (error()) {
+          <div class="error-message">{{ error() }}</div>
+        }
+        
+        @if (successMessage()) {
+          <div class="success-message">{{ successMessage() }}</div>
+        }
+
+        <!-- Actions -->
+        <div class="form-actions">
+          @if (mode() === 'create') {
+            <button 
+              class="btn btn-primary" 
+              (click)="generatePayroll()"
+              [disabled]="saving()">
+              @if (saving()) {
+                Generating...
+              } @else {
+                Generate Payroll
+              }
+            </button>
+          } @else if (mode() === 'pay') {
+            <button 
+              class="btn btn-success" 
+              (click)="markAsPaid()"
+              [disabled]="saving()">
+              @if (saving()) {
+                Processing...
+              } @else {
+                Mark as Paid
+              }
+            </button>
+          }
+          <button class="btn btn-outline" (click)="goBack()">Cancel</button>
+        </div>
+      } @else {
+        <!-- View Mode - Display Details -->
+        <div class="payroll-details">
+          <div class="detail-section">
+            <h3>Employee Information</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Employee:</label>
+                <span>{{ getEmployeeName(selectedEmployeeId()) }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Salary Month:</label>
+                <span>{{ salaryMonth() | date:'MMMM yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Earnings</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Basic Salary:</label>
+                <span>₹{{ basicSalary() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>HRA:</label>
+                <span>₹{{ hra() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Medical Allowance:</label>
+                <span>₹{{ medicalAllowance() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Transport Allowance:</label>
+                <span>₹{{ transportAllowance() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Other Allowances:</label>
+                <span>₹{{ otherAllowances() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Bonus:</label>
+                <span>₹{{ bonus() | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Deductions</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>PF Deduction:</label>
+                <span>₹{{ pfDeduction() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Tax Deduction:</label>
+                <span>₹{{ taxDeduction() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Loan Deduction:</label>
+                <span>₹{{ loanDeduction() | number:'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Other Deductions:</label>
+                <span>₹{{ otherDeductions() | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Working Information</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Working Days:</label>
+                <span>{{ workingDays() }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Leave Days:</label>
+                <span>{{ leaveDays() }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Overtime Hours:</label>
+                <span>{{ overtimeHours() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section summary-section">
+            <h3>Salary Summary</h3>
+            <div class="summary-row">
+              <span>Gross Salary:</span>
+              <span class="amount">₹{{ grossSalary() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row">
+              <span>Total Deductions:</span>
+              <span class="amount deduction">-₹{{ totalDeductions() | number:'1.2-2' }}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Net Salary:</span>
+              <span class="amount">₹{{ netSalary() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          @if (payroll()) {
+            <div class="detail-section">
+              <h3>Payment Status</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Status:</label>
+                  <span class="status-badge" [class]="'status-' + payroll()?.paymentStatus?.toLowerCase()">
+                    {{ payroll()?.paymentStatus }}
+                  </span>
+                </div>
+                @if (payroll()?.paymentDate) {
+                  <div class="detail-item">
+                    <label>Payment Date:</label>
+                    <span>{{ payroll()?.paymentDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
+                @if (payroll()?.paymentMode) {
+                  <div class="detail-item">
+                    <label>Payment Mode:</label>
+                    <span>{{ payroll()?.paymentMode }}</span>
+                  </div>
+                }
+                @if (payroll()?.paymentReference) {
+                  <div class="detail-item">
+                    <label>Reference:</label>
+                    <span>{{ payroll()?.paymentReference }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="form-actions">
+          @if (payroll()?.paymentStatus === 'Pending') {
+              <button 
+                class="btn btn-success" 
+                [routerLink]="['/payroll', payroll()?.id, 'pay']"
+                [queryParams]="{shopId: shopId()}">
+                Mark as Paid
+              </button>
+            }
+            <button class="btn btn-outline" (click)="goBack()">Back to List</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+

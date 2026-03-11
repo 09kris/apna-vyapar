@@ -1,0 +1,84 @@
+<div class="shops-container">
+  <div class="page-header">
+    <h1 class="page-title">My Shops</h1>
+    <button class="btn btn-primary" routerLink="/shops/add">
+      <span>+ Add New Shop</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading shops...</div>
+  } @else if (shops().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🏪</div>
+      <h3>No shops yet</h3>
+      <p>Create your first shop to get started</p>
+      <button class="btn btn-primary" routerLink="/shops/add">Add Your First Shop</button>
+    </div>
+  } @else {
+    <div class="shops-grid">
+      @for (shop of shops(); track shop.shopId) {
+        <div class="shop-card" [class.inactive]="!shop.isActive">
+          <div class="shop-header">
+            <div class="shop-logo">
+              @if (shop.shopLogo) {
+                <img [src]="shop.shopLogo" [alt]="shop.shopName">
+              } @else {
+                <span class="logo-placeholder">🏪</span>
+              }
+            </div>
+            <div class="shop-status" [class.active]="shop.isActive">
+              {{ shop.isActive ? 'Active' : 'Inactive' }}
+            </div>
+          </div>
+          
+          <div class="shop-body">
+            <h3 class="shop-name">{{ shop.shopName }}</h3>
+            <p class="shop-type">{{ shop.shopType }}</p>
+            <p class="shop-location">
+              <span>📍</span> {{ shop.city }}, {{ shop.state }}
+            </p>
+            <p class="shop-email">
+              <span>📧</span> {{ shop.email }}
+            </p>
+            <p class="shop-phone">
+              <span>📱</span> {{ shop.phoneNumber }}
+            </p>
+          </div>
+
+          <div class="shop-stats">
+            <div class="stat">
+              <span class="stat-value">{{ shop.totalProducts || 0 }}</span>
+              <span class="stat-label">Products</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ shop.totalOrders || 0 }}</span>
+              <span class="stat-label">Orders</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ shop.rating || 0 }}</span>
+              <span class="stat-label">Rating</span>
+            </div>
+          </div>
+
+          <div class="shop-actions">
+            <button class="btn btn-sm btn-outline" [routerLink]="['/shops', shop.shopId]">
+              View Details
+            </button>
+            <button class="btn btn-sm btn-outline" [routerLink]="['/shops', shop.shopId, 'edit']">
+              Edit
+            </button>
+            <button class="btn btn-sm" [class.btn-success]="!shop.isActive" [class.btn-warning]="shop.isActive" 
+              (click)="toggleShopStatus(shop)">
+              {{ shop.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+</div>

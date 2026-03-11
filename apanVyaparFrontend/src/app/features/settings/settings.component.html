@@ -1,0 +1,339 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <h1>Settings</h1>
+    <p class="subtitle">Manage your shop settings and preferences</p>
+  </div>
+
+  <!-- Shop Selector -->
+  @if (shops().length > 0) {
+    <div class="shop-selector">
+      <label for="shopSelect">Select Shop:</label>
+      <select 
+        id="shopSelect" 
+        (change)="onShopChange($event)" 
+        [value]="selectedShopId()">
+        @for (shop of shops(); track shop.shopId) {
+          <option [value]="shop.shopId">{{ shop.shopName }}</option>
+        }
+      </select>
+      @if (!isShopOwned()) {
+        <span class="ownership-warning" title="You don't have owner permissions for this shop">
+          ⚠️ Read-only mode
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Success/Error Messages -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="alert-icon">✓</span>
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="alert-icon">⚠</span>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Settings Tabs -->
+  <div class="settings-tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'employee-fields'"
+      (click)="setActiveTab('employee-fields')">
+      <span class="tab-icon">👤</span>
+      Employee Fields
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'product-fields'"
+      (click)="setActiveTab('product-fields')">
+      <span class="tab-icon">📦</span>
+      Product Fields
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'shop-fields'"
+      (click)="setActiveTab('shop-fields')">
+      <span class="tab-icon">🏪</span>
+      Shop Fields
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'general'"
+      (click)="setActiveTab('general')">
+      <span class="tab-icon">⚙️</span>
+      General
+    </button>
+  </div>
+
+  <!-- Employee Fields Configuration -->
+  @if (activeTab() === 'employee-fields') {
+    <div class="settings-content">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Employee Fields Configuration</h2>
+          <p>Choose which fields to show when adding or editing employees</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" (click)="selectAll()">Select All</button>
+          <button class="btn btn-secondary" (click)="deselectAll()">Deselect All</button>
+          <button class="btn btn-outline" (click)="resetToDefaults()">Reset</button>
+        </div>
+      </div>
+
+      <div class="fields-info">
+        <span class="info-badge">{{ enabledFieldsCount }} fields enabled</span>
+      </div>
+
+      <div class="fields-grid">
+        @for (field of availableFields; track field.key) {
+          <div class="field-card" [class.disabled]="!field.enabled">
+            <div class="field-header">
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  [checked]="field.enabled" 
+                  (change)="toggleField(field)">
+                <span class="checkbox-custom"></span>
+                <span class="field-label">{{ field.label }}</span>
+              </label>
+            </div>
+            <div class="field-meta">
+              <span class="field-type">{{ field.type }}</span>
+              <label class="required-toggle">
+                <input 
+                  type="checkbox" 
+                  [checked]="field.required" 
+                  (change)="toggleRequired(field)"
+                  [disabled]="!field.enabled">
+                <span>Required</span>
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button 
+          class="btn btn-primary" 
+          (click)="saveFieldConfiguration()"
+          [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="spinner"></span>
+            Saving...
+          } @else {
+            Save Configuration
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Product Fields Configuration -->
+  @if (activeTab() === 'product-fields') {
+    <div class="settings-content">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Product Fields Configuration</h2>
+          <p>Choose which fields to show when adding or editing products</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" (click)="selectAllProductFields()">Select All</button>
+          <button class="btn btn-secondary" (click)="deselectAllProductFields()">Deselect All</button>
+          <button class="btn btn-outline" (click)="resetProductFieldsToDefaults()">Reset</button>
+        </div>
+      </div>
+
+      <div class="fields-info">
+        <span class="info-badge">{{ enabledProductFieldsCount }} fields enabled</span>
+      </div>
+
+      <div class="fields-grid">
+        @for (field of availableProductFields; track field.key) {
+          <div class="field-card" [class.disabled]="!field.enabled">
+            <div class="field-header">
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  [checked]="field.enabled" 
+                  (change)="toggleProductField(field)">
+                <span class="checkbox-custom"></span>
+                <span class="field-label">{{ field.label }}</span>
+              </label>
+            </div>
+            <div class="field-meta">
+              <span class="field-type">{{ field.type }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button 
+          class="btn btn-primary" 
+          (click)="saveFieldConfiguration()"
+          [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="spinner"></span>
+            Saving...
+          } @else {
+            Save Configuration
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Shop Fields Configuration -->
+  @if (activeTab() === 'shop-fields') {
+    <div class="settings-content">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Shop Fields Configuration</h2>
+          <p>Choose which fields to show when viewing or editing your shop</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" (click)="selectAllShopFields()">Select All</button>
+          <button class="btn btn-secondary" (click)="deselectAllShopFields()">Deselect All</button>
+          <button class="btn btn-outline" (click)="resetShopFieldsToDefaults()">Reset</button>
+        </div>
+      </div>
+
+      <div class="fields-info">
+        <span class="info-badge">{{ enabledShopFieldsCount }} fields enabled</span>
+      </div>
+
+      <div class="fields-grid">
+        @for (field of availableShopFields; track field.key) {
+          <div class="field-card" [class.disabled]="!field.enabled">
+            <div class="field-header">
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  [checked]="field.enabled" 
+                  (change)="toggleShopField(field)">
+                <span class="checkbox-custom"></span>
+                <span class="field-label">{{ field.label }}</span>
+              </label>
+            </div>
+            <div class="field-meta">
+              <span class="field-type">{{ field.type }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button 
+          class="btn btn-primary" 
+          (click)="saveFieldConfiguration()"
+          [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="spinner"></span>
+            Saving...
+          } @else {
+            Save Configuration
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- General Settings -->
+  @if (activeTab() === 'general') {
+    <div class="settings-content">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>General Settings</h2>
+          <p>Manage your shop's general settings and preferences</p>
+        </div>
+      </div>
+
+      <!-- Public View Toggle -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-icon">🌐</div>
+          <div class="settings-card-title">
+            <h3>Public Catalog View</h3>
+            <p>Enable or disable public access to your shop catalog</p>
+          </div>
+        </div>
+        
+        <div class="settings-card-content">
+          <div class="toggle-container">
+            <div class="toggle-info">
+              <span class="toggle-label">Public View Status</span>
+              <span class="toggle-description">
+                @if (publicViewEnabled()) {
+                  Your shop is visible to the public. Customers can view your products without logging in.
+                } @else {
+                  Your shop is private. Only authorized users can view your products.
+                }
+              </span>
+            </div>
+            
+            <div class="toggle-switch">
+              @if (isLoadingPublicView()) {
+                <div class="loading-spinner-small"></div>
+              } @else {
+                <button 
+                  class="toggle-btn"
+                  [class.active]="publicViewEnabled()"
+                  [disabled]="isTogglingPublicView() || !isShopOwned()"
+                  (click)="togglePublicView()">
+                  @if (isTogglingPublicView()) {
+                    <span class="spinner-small"></span>
+                  } @else {
+                    {{ publicViewEnabled() ? 'Enabled' : 'Disabled' }}
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="status-indicator" [class.active]="publicViewEnabled()">
+            <span class="status-dot"></span>
+            <span class="status-text">
+              {{ publicViewEnabled() ? 'Public Access Active' : 'Private' }}
+            </span>
+          </div>
+        </div>
+
+        @if (!isShopOwned()) {
+          <div class="permission-notice">
+            <span class="notice-icon">ℹ️</span>
+            <span>You need owner permissions to change this setting.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Other General Settings (Coming Soon) -->
+      <div class="coming-soon-section">
+        <h3>More Settings Coming Soon</h3>
+        <div class="coming-soon-grid">
+          <div class="coming-soon-item">
+            <span class="item-icon">🏪</span>
+            <span>Shop Profile</span>
+          </div>
+          <div class="coming-soon-item">
+            <span class="item-icon">🕐</span>
+            <span>Business Hours</span>
+          </div>
+          <div class="coming-soon-item">
+            <span class="item-icon">🔔</span>
+            <span>Notification Preferences</span>
+          </div>
+          <div class="coming-soon-item">
+            <span class="item-icon">📋</span>
+            <span>Tax Settings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
