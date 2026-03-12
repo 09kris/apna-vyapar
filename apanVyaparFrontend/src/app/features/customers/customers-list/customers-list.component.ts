@@ -55,7 +55,14 @@ export class CustomersListComponent implements OnInit {
         if (response.data) {
           // Backend returns array directly in response.data
           const customers = Array.isArray(response.data) ? response.data : [];
-          this.customers.set(customers);
+          // Map to ensure fullName is always a string
+          const mappedCustomers = customers.map(c => ({
+            ...c,
+            fullName: c.fullName || c.customerName || '',
+            phone: c.phone || c.customerPhone || '',
+            email: c.email || c.customerEmail || ''
+          }));
+          this.customers.set(mappedCustomers as ShopCustomer[]);
           this.totalCustomers.set(customers.length);
           this.totalPages.set(1);
           this.updateStats();
@@ -71,8 +78,8 @@ export class CustomersListComponent implements OnInit {
 
   updateStats(): void {
     const customerList = this.customers();
-    const retailCount = customerList.filter(c => c.customerType === 'Retail').length;
-    const wholesaleCount = customerList.filter(c => c.customerType === 'Wholesale').length;
+    const retailCount = customerList.filter(c => c.customerType === 'RETAIL').length;
+    const wholesaleCount = customerList.filter(c => c.customerType === 'WHOLESALE').length;
     const totalRevenue = customerList.reduce((sum, c) => sum + (c.totalPurchases || 0), 0);
 
     this.stats.set([
@@ -104,7 +111,13 @@ export class CustomersListComponent implements OnInit {
     this.loadCustomers();
   }
 
-  deleteCustomer(customerId: string): void {
+  deleteCustomer(customerId?: string): void {
+    // ensure we have a valid id before proceeding
+    if (!customerId) {
+      console.warn('deleteCustomer called without id');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this customer?')) return;
 
     this.apiService.deleteCustomer(customerId).subscribe({

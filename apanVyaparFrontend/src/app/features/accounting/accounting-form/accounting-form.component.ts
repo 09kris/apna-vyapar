@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../../core/services/accounting.service';
-import { CreateAccountingRequest, AccountingCategory } from '../../../core/models';
+import { CreateAccountingRequest } from '../../../core/models';
 
 @Component({
   selector: 'app-accounting-form',
@@ -92,12 +92,14 @@ export class AccountingFormComponent implements OnInit {
     this.success.set('');
 
     const data: CreateAccountingRequest = {
-      transactionType: this.transactionType() as 'INCOME' | 'EXPENSE',
-      category: this.category() as AccountingCategory,
+      // API expects entryType/entryDate terminology
+      entryType: this.transactionType() as 'INCOME' | 'EXPENSE',
+      category: this.category(),
       amount: this.amount(),
       description: this.description() || undefined,
-      paymentMode: this.paymentMode() as any || undefined,
-      transactionDate: this.transactionDate() ? new Date(this.transactionDate()) : new Date()
+      paymentMethod: this.paymentMode() as any || undefined,
+      entryDate: this.transactionDate() ? new Date(this.transactionDate()).toISOString() : new Date().toISOString(),
+      shopId: this.shopId()
     };
 
     this.accountingService.createAccountingEntry(this.shopId(), data).subscribe({

@@ -2,10 +2,11 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../core/services/api.service';
 
-interface LoyaltyTransaction {
+// UI-specific transaction type to avoid clashing with the backend model
+interface UILoyaltyTransaction {
   id: string;
   shopId: string;
-  transactionType: 'Earn' | 'Redeem' | 'Expire';
+  transactionType: 'Earn' | 'Redeem' | 'Expire' | 'Adjust';
   pointsChange: number;
   balanceBefore: number;
   balanceAfter: number;
@@ -29,7 +30,7 @@ export class ClientLoyaltyComponent implements OnInit {
 
   loading = signal(true);
   totalPoints = signal(0);
-  transactions = signal<LoyaltyTransaction[]>([]);
+  transactions = signal<UILoyaltyTransaction[]>([]);
 
   ngOnInit(): void {
     this.loadLoyaltyData();
@@ -40,7 +41,19 @@ export class ClientLoyaltyComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.totalPoints.set(response.data.totalPoints || 0);
-          this.transactions.set(response.data.transactions || []);
+          // convert backend transactions to UI shape
+          const mapped: UILoyaltyTransaction[] = (response.data.transactions || []).map(txn => ({
+            id: txn.id,
+            shopId: txn.shopId,
+            transactionType: txn.type === 'EARN' ? 'Earn' : txn.type === 'REDEEM' ? 'Redeem' : txn.type === 'EXPIRE' ? 'Expire' : 'Adjust',
+            pointsChange: txn.type === 'REDEEM' ? -txn.points : txn.points,
+            balanceBefore: 0,
+            balanceAfter: 0,
+            reason: txn.description,
+            createdAt: new Date(txn.createdAt),
+            shop: (txn as any).shop || undefined
+          }));
+          this.transactions.set(mapped);
         }
         this.loading.set(false);
       },

@@ -52,8 +52,8 @@ import { StatusHelperService, ORDER_STATUSES, PAYMENT_STATUSES } from '../../../
       <div class="timeline" *ngIf="!loading() && history().length > 0">
         <div class="timeline-item" *ngFor="let item of history(); let first = first; let last = last" [class.first]="first" [class.last]="last">
           <!-- Timeline Dot -->
-          <div class="timeline-dot" [class]="getStatusClass(item.newStatus)">
-            <span class="dot-icon">{{ getStatusIcon(item.newStatus, item.type) }}</span>
+          <div class="timeline-dot" [class]="getStatusClass(item.newStatus || '')">
+            <span class="dot-icon">{{ getStatusIcon(item.newStatus || '', item.type || '') }}</span>
           </div>
           
           <!-- Timeline Line -->
@@ -69,8 +69,8 @@ import { StatusHelperService, ORDER_STATUSES, PAYMENT_STATUSES } from '../../../
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-              <span class="new-status" [class]="getStatusClass(item.newStatus)">
-                {{ formatStatus(item.newStatus) }}
+              <span class="new-status" [class]="getStatusClass(item.newStatus || '')">
+                {{ formatStatus(item.newStatus || '') }}
               </span>
             </div>
             
@@ -407,19 +407,19 @@ export class OrderStatusHistoryComponent implements OnInit {
     });
   }
 
-  formatStatus(status: string): string {
-    return this.statusHelper.formatStatus(status);
+  formatStatus(status?: string): string {
+    return this.statusHelper.formatStatus(status || '');
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status?: string): string {
     return status?.toLowerCase() || '';
   }
 
-  getStatusIcon(status: string, type: string): string {
+  getStatusIcon(status?: string, type?: string): string {
     if (type === 'PAYMENT_STATUS') {
-      return this.statusHelper.getPaymentStatusIcon(status);
+      return this.statusHelper.getPaymentStatusIcon(status || '');
     }
-    return this.statusHelper.getOrderStatusIcon(status);
+    return this.statusHelper.getOrderStatusIcon(status || '');
   }
 }
 

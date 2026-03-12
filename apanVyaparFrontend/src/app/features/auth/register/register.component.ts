@@ -48,9 +48,9 @@ export class RegisterComponent {
     this.error.set('');
 
     // Build registration data - Part 1: User details only
+    const fullName = `${this.firstName} ${this.lastName}`.trim();
     const registerData = { 
-      firstName: this.firstName, 
-      lastName: this.lastName,
+      fullName: fullName,
       email: this.email, 
       phoneNumber: this.phone,
       password: this.password,

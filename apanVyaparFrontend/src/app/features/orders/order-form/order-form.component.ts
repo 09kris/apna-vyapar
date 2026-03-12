@@ -2,10 +2,10 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { OrderService, OrderItem } from '../../../core/services/order.service';
+import { OrderService } from '../../../core/services/order.service';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Product, ShopCustomer } from '../../../core/models';
+import { Product, ShopCustomer, OrderItem } from '../../../core/models';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 interface OrderLineItem {
@@ -43,14 +43,14 @@ export class OrderFormComponent implements OnInit, OnDestroy {
   private draftAutoSave$ = new Subject<void>();
 
   // Data
-  customers = signal<ShopCustomer[]>([]);
-  filteredCustomers = signal<ShopCustomer[]>([]);
+  customers = signal<any[]>([]);
+  filteredCustomers = signal<any[]>([]);
   products = signal<Product[]>([]);
   filteredProducts = signal<Product[]>([]);
   
   // Form data
-  selectedCustomer = signal<ShopCustomer | null>(null);
-  orderType = signal<'RETAIL' | 'WHOLESALE'>('RETAIL');
+  selectedCustomer = signal<any>(null);
+  orderType = signal<string>('RETAIL');
   orderItems = signal<OrderLineItem[]>([]);
   customerNotes = signal('');
   internalNotes = signal('');
@@ -368,10 +368,10 @@ const customer = this.customers().find(c => c.id === draft.customerId);
       return;
     }
 
-    // Get price based on order type
-    const unitPrice = this.orderType() === 'WHOLESALE' 
+    // Get price based on order type - handle undefined prices
+    const unitPrice = (this.orderType() === 'WHOLESALE' 
       ? product.wholesalePrice 
-      : product.retailPrice;
+      : product.retailPrice) || 0;
 
     const newItem: OrderLineItem = {
       id: this.generateId(),
@@ -483,9 +483,9 @@ const customer = this.customers().find(c => c.id === draft.customerId);
       const product = this.products().find(p => this.getProductId(p) === item.productId);
       if (product) {
         const newItem = { ...item };
-        newItem.unitPrice = this.orderType() === 'WHOLESALE' 
+        newItem.unitPrice = ((this.orderType() === 'WHOLESALE' 
           ? product.wholesalePrice 
-          : product.retailPrice;
+          : product.retailPrice) || 0);
         this.calculateItemTotals(newItem);
         return newItem;
       }

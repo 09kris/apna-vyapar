@@ -76,23 +76,21 @@
               <td>{{ employee.employeeCode || '-' }}</td>
               <td>
                 <div class="employee-name">
-                  <strong>{{ employee.user?.fullName || 'N/A' }}</strong>
-                  @if (employee.user?.email) {
-                    <span class="employee-email">{{ employee.user?.email }}</span>
-                  }
+                  <strong>{{ employee.firstName }} {{ employee.lastName }}</strong>
+                  <span class="employee-email">{{ employee.email }}</span>
                 </div>
               </td>
               <td>{{ employee.designation || '-' }}</td>
               <td>
-                <span class="type-badge" [class.worker]="employee.employeeType === 'Worker'" [class.manager]="employee.employeeType === 'Manager'">
-                  {{ employee.employeeType || 'Worker' }}
+                <span class="type-badge">
+                  {{ employee.firstName ? 'Worker' : 'N/A' }}
                 </span>
               </td>
               <td>{{ employee.department || '-' }}</td>
               <td>
-                <span class="type-badge" [class.full-time]="employee.employmentType === 'Full-time'" 
-                      [class.part-time]="employee.employmentType === 'Part-time'"
-                      [class.contract]="employee.employmentType === 'Contract'">
+                <span class="type-badge" [class.full-time]="employee.employmentType === 'FULL_TIME'" 
+                      [class.part-time]="employee.employmentType === 'PART_TIME'"
+                      [class.contract]="employee.employmentType === 'CONTRACT'">
                   {{ employee.employmentType || 'N/A' }}
                 </span>
               </td>

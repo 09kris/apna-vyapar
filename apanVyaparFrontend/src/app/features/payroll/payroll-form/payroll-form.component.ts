@@ -4,7 +4,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Employee, Shop, Payroll } from '../../../core/models';
+import { Employee, Shop, PayrollDetails } from '../../../core/models';
 
 @Component({
   selector: 'app-payroll-form',
@@ -25,7 +25,7 @@ export class PayrollFormComponent implements OnInit {
   
   shops = signal<Shop[]>([]);
   employees = signal<Employee[]>([]);
-  payroll = signal<Payroll | null>(null);
+  payroll = signal<PayrollDetails | null>(null);
   loading = signal(true);
   saving = signal(false);
   error = signal<string | null>(null);
@@ -145,7 +145,7 @@ export class PayrollFormComponent implements OnInit {
 
     this.apiService.getPayroll(pid).subscribe({
       next: (response) => {
-        const payrollData = response.data;
+        const payrollData = response.data as PayrollDetails;
         if (!payrollData) {
           this.error.set('Payroll not found');
           this.loading.set(false);
@@ -155,7 +155,7 @@ export class PayrollFormComponent implements OnInit {
         this.payroll.set(payrollData);
         
         this.selectedEmployeeId.set(payrollData.employeeId);
-        this.salaryMonth.set(payrollData.salaryMonth);
+        this.salaryMonth.set(payrollData.salaryMonth || '');
         
         this.basicSalary.set(Number(payrollData.basicSalary));
         this.hra.set(Number(payrollData.hra) || 0);
@@ -170,9 +170,12 @@ export class PayrollFormComponent implements OnInit {
         this.loanDeduction.set(Number(payrollData.loanDeduction) || 0);
         this.otherDeductions.set(Number(payrollData.otherDeductions) || 0);
         
-        this.workingDays.set(payrollData.workingDays);
+        this.workingDays.set(payrollData.workingDays || 30);
         this.leaveDays.set(Number(payrollData.leaveDays) || 0);
         this.overtimeHours.set(Number(payrollData.overtimeHours) || 0);
+        
+        this.paymentMode.set(payrollData.paymentMode || 'CASH');
+        this.paymentReference.set(payrollData.paymentReference || '');
         
         this.calculateTotals();
         this.loading.set(false);

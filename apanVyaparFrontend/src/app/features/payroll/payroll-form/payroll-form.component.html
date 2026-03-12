@@ -494,7 +494,7 @@
           }
 
           <div class="form-actions">
-          @if (payroll()?.paymentStatus === 'Pending') {
+          @if (payroll()?.paymentStatus === 'PENDING') {
               <button 
                 class="btn btn-success" 
                 [routerLink]="['/payroll', payroll()?.id, 'pay']"

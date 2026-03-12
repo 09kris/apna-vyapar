@@ -4,7 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Payroll, Employee, Shop } from '../../../core/models';
+import { Payroll, Employee, Shop, PayrollDetails } from '../../../core/models';
 
 @Component({
   selector: 'app-payroll-list',
@@ -18,7 +18,7 @@ export class PayrollListComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
 
-  payrolls = signal<Payroll[]>([]);
+  payrolls = signal<(Payroll & PayrollDetails)[]>([]);
   employees = signal<Employee[]>([]);
   shops = signal<Shop[]>([]);
   loading = signal(true);
@@ -126,8 +126,8 @@ export class PayrollListComponent implements OnInit {
         this.totalPages.set(response.data?.totalPages || 1);
         this.loading.set(false);
       },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Failed to load payrolls');
+      error: (err: any) => {
+        this.error.set(err?.error?.message || 'Failed to load payrolls');
         this.loading.set(false);
       }
     });
@@ -157,24 +157,29 @@ export class PayrollListComponent implements OnInit {
       return;
     }
 
-    this.apiService.deletePayroll(payroll.id).subscribe({
+    const payrollId = payroll.id || payroll.payrollId;
+    if (!payrollId) return;
+
+    this.apiService.deletePayroll(payrollId).subscribe({
       next: () => {
         this.loadPayrolls();
       },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Failed to delete payroll');
+      error: (err: any) => {
+        this.error.set(err?.error?.message || 'Failed to delete payroll');
       }
     });
   }
 
-  getEmployeeName(payroll: Payroll): string {
-    if (payroll.employee?.user) {
-      return payroll.employee.user.fullName || 'N/A';
+  getEmployeeName(payroll: Payroll & PayrollDetails): string {
+    // Try to get from the employee lookup
+    const employee = this.employees().find(e => e.id === payroll.employeeId || e.employeeId === payroll.employeeId);
+    if (employee) {
+      return `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || 'N/A';
     }
-    return 'N/A';
+    return payroll.employeeName || 'N/A';
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: string | undefined): string {
     switch (status) {
       case 'PAID': return 'status-paid';
       case 'PENDING': return 'status-pending';

@@ -218,7 +218,7 @@ import { OrderStatusHistoryComponent } from '../order-status-history/order-statu
                   <line x1="3" y1="6" x2="21" y2="6"></line>
                   <path d="M16 10a4 4 0 0 1-8 0"></path>
                 </svg>
-                <h3>Order Items ({{ currentOrder.items?.length || 0 }})</h3>
+                <h3>Order Items ({{ currentOrder.items.length || 0 }})</h3>
               </div>
               <div class="card-body">
                 <div class="items-list">

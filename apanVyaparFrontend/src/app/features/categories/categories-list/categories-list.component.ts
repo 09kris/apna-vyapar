@@ -109,7 +109,7 @@ export class CategoriesListComponent implements OnInit {
       return;
     }
 
-    this.apiService.deleteCategory(category.id || (category as any).categoryId, this.selectedShopId()).subscribe({
+    this.apiService.deleteCategory(category.id || (category as any).categoryId).subscribe({
       next: () => {
         this.loadCategories(this.selectedShopId());
       },
@@ -125,7 +125,7 @@ export class CategoriesListComponent implements OnInit {
       return;
     }
 
-    this.apiService.updateCategory(category.id || (category as any).categoryId, this.selectedShopId(), { isActive: newStatus } as any).subscribe({
+    this.apiService.updateCategory(category.id || (category as any).categoryId, { isActive: newStatus } as any, this.selectedShopId()).subscribe({
       next: () => {
         this.loadCategories(this.selectedShopId());
       },

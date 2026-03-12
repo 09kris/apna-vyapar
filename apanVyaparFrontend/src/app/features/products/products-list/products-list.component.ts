@@ -137,7 +137,7 @@ ngOnInit(): void {
     const search = this.searchQuery();
     const page = this.currentPage();
 
-    this.apiService.getProducts(shopId || undefined, categoryId || undefined, search || undefined, page, this.pageSize).subscribe({
+    this.apiService.getProducts(shopId, categoryId || undefined, search || undefined, page, this.pageSize).subscribe({
       next: (response) => {
         this.products.set(response.data.items || []);
         this.totalItems.set(response.data.total);

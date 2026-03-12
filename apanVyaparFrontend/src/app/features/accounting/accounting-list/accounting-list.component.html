@@ -28,8 +28,8 @@
             <h3>Income (This Month)</h3>
             <p class="stat-value">{{ formatAmount(dashboard()?.currentPeriod?.income || 0) }}</p>
             @if (dashboard()?.currentPeriod?.incomeGrowth) {
-              <span class="stat-change" [class.positive]="dashboard()!.currentPeriod!.incomeGrowth > 0" [class.negative]="dashboard()!.currentPeriod!.incomeGrowth < 0">
-                {{ dashboard()!.currentPeriod!.incomeGrowth > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()!.currentPeriod!.incomeGrowth || 0) }}%
+              <span class="stat-change" [class.positive]="(dashboard()?.currentPeriod?.incomeGrowth || 0) > 0" [class.negative]="(dashboard()?.currentPeriod?.incomeGrowth || 0) < 0">
+                {{ (dashboard()?.currentPeriod?.incomeGrowth || 0) > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()?.currentPeriod?.incomeGrowth || 0) }}%
               </span>
             }
           </div>
@@ -41,8 +41,8 @@
             <h3>Expenses (This Month)</h3>
             <p class="stat-value">{{ formatAmount(dashboard()?.currentPeriod?.expense || 0) }}</p>
             @if (dashboard()?.currentPeriod?.expenseGrowth) {
-              <span class="stat-change" [class.positive]="dashboard()!.currentPeriod!.expenseGrowth < 0" [class.negative]="dashboard()!.currentPeriod!.expenseGrowth > 0">
-                {{ dashboard()!.currentPeriod!.expenseGrowth > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()!.currentPeriod!.expenseGrowth || 0) }}%
+              <span class="stat-change" [class.positive]="(dashboard()?.currentPeriod?.expenseGrowth || 0) < 0" [class.negative]="(dashboard()?.currentPeriod?.expenseGrowth || 0) > 0">
+                {{ (dashboard()?.currentPeriod?.expenseGrowth || 0) > 0 ? '↑' : '↓' }} {{ Math.abs(dashboard()?.currentPeriod?.expenseGrowth || 0) }}%
               </span>
             }
           </div>
@@ -52,7 +52,7 @@
           <div class="stat-icon">💰</div>
           <div class="stat-content">
             <h3>Net Balance</h3>
-            <p class="stat-value" [class.positive]="dashboard()!.currentPeriod!.net > 0" [class.negative]="dashboard()!.currentPeriod!.net < 0">
+            <p class="stat-value" [class.positive]="(dashboard()?.currentPeriod?.net || 0) > 0" [class.negative]="(dashboard()?.currentPeriod?.net || 0) < 0">
               {{ formatAmount(dashboard()?.currentPeriod?.net || 0) }}
             </p>
           </div>
@@ -62,7 +62,7 @@
           <div class="stat-icon">🏦</div>
           <div class="stat-content">
             <h3>All Time Balance</h3>
-            <p class="stat-value" [class.positive]="dashboard()!.allTime!.netBalance > 0" [class.negative]="dashboard()!.allTime!.netBalance < 0">
+            <p class="stat-value" [class.positive]="(dashboard()?.allTime?.netBalance || 0) > 0" [class.negative]="(dashboard()?.allTime?.netBalance || 0) < 0">
               {{ formatAmount(dashboard()?.allTime?.netBalance || 0) }}
             </p>
           </div>
@@ -141,18 +141,18 @@
             <tbody>
               @for (txn of transactions(); track txn.accountingId) {
                 <tr>
-                  <td>{{ formatDate(txn.transactionDate) }}</td>
+                  <td>{{ formatDate(txn.transactionDate || txn.entryDate) }}</td>
                   <td>
-                    <span class="type-badge" [class.income]="txn.transactionType === 'INCOME'" [class.expense]="txn.transactionType === 'EXPENSE'">
-                      {{ txn.transactionType }}
+                    <span class="type-badge" [class.income]="(txn.transactionType || txn.entryType) === 'INCOME'" [class.expense]="(txn.transactionType || txn.entryType) === 'EXPENSE'">
+                      {{ txn.transactionType || txn.entryType }}
                     </span>
                   </td>
                   <td>{{ getCategoryLabel(txn.category) }}</td>
                   <td>{{ txn.description || '-' }}</td>
-                  <td class="amount" [class.income]="txn.transactionType === 'INCOME'" [class.expense]="txn.transactionType === 'EXPENSE'">
-                    {{ txn.transactionType === 'INCOME' ? '+' : '-' }} {{ formatAmount(txn.amount) }}
+                  <td class="amount" [class.income]="(txn.transactionType || txn.entryType) === 'INCOME'" [class.expense]="(txn.transactionType || txn.entryType) === 'EXPENSE'">
+                    {{ (txn.transactionType || txn.entryType) === 'INCOME' ? '+' : '-' }} {{ formatAmount(txn.amount) }}
                   </td>
-                  <td>{{ txn.paymentMode || '-' }}</td>
+                  <td>{{ txn.paymentMode || txn.paymentMethod || '-' }}</td>
                   <td>
                     <button class="btn-icon btn-delete" (click)="deleteTransaction(txn.accountingId)" title="Delete">
                       🗑️

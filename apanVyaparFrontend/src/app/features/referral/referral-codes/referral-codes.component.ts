@@ -115,8 +115,10 @@ export class ReferralCodesComponent implements OnInit {
     // Load categories
     this.apiService.getCategories(shopId).subscribe({
       next: (response) => {
-        if (response.data?.categories) {
-          this.availableCategories.set(response.data.categories || []);
+        // ApiResponse<ProductCategory[]> – backend sometimes wraps array in { categories: [...] }
+        const payload: any = response.data;
+        if (payload?.categories) {
+          this.availableCategories.set(payload.categories || []);
         } else if (Array.isArray(response.data)) {
           this.availableCategories.set(response.data || []);
         } else {
@@ -226,7 +228,7 @@ export class ReferralCodesComponent implements OnInit {
     this.formData.set({
       name: referralCode.name,
       description: referralCode.description || '',
-      selectionType: referralCode.selectionType,
+      selectionType: referralCode.selectionType || 'products',
       selectedProducts: referralCode.selectedProducts || [],
       selectedCategories: referralCode.selectedCategories || []
     });
@@ -254,6 +256,7 @@ export class ReferralCodesComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
+    if (!referral.referralId) { this.error.set('Invalid referral'); this.loading.set(false); return; }
     this.referralService.updateReferralCode(referral.referralId, {
       name: data.name,
       description: data.description,
@@ -292,6 +295,7 @@ export class ReferralCodesComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
+    if (!referral.referralId) { this.error.set('Invalid referral'); this.loading.set(false); return; }
     this.referralService.deleteReferralCode(referral.referralId).subscribe({
       next: (response) => {
         this.successMessage.set('Referral code deleted successfully!');
@@ -308,6 +312,7 @@ export class ReferralCodesComponent implements OnInit {
   }
 
   toggleReferralCodeStatus(referralCode: ReferralCode): void {
+    if (!referralCode.referralId) return;
     this.toggling.set(referralCode.referralId);
     this.error.set(null);
 

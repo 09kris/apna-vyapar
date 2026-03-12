@@ -4,15 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Employee, Shop, CreateEmployeeRequest } from '../../../core/models';
-
-interface EmployeeField {
-  key: string;
-  label: string;
-  type: string;
-  enabled: boolean;
-  required: boolean;
-}
+import { Employee, Shop, CreateEmployeeRequest, EmployeeField, FormFieldConfig } from '../../../core/models';
 
 @Component({
   selector: 'app-employee-form',
@@ -64,7 +56,7 @@ export class EmployeeFormComponent implements OnInit {
     employeeCode: '',
     designation: '',
     department: '',
-    employmentType: 'Full-time',
+    employmentType: 'FULL_TIME',
     employeeType: 'Worker',
     salary: 0,
     joiningDate: new Date(),
@@ -89,7 +81,7 @@ export class EmployeeFormComponent implements OnInit {
   employeeId = signal<string>('');
 
   // Employment types
-  employmentTypes = ['Full-time', 'Part-time', 'Contract'];
+  employmentTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT'];
 
   // Employee types (Worker/Manager)
   employeeTypes = ['Worker', 'Manager'];
@@ -139,10 +131,10 @@ export class EmployeeFormComponent implements OnInit {
     if (config.length === 0) {
       // Use defaults if no config loaded
       const defaultField = this.defaultFields.find(f => f.key === fieldKey);
-      return defaultField ? defaultField.required : false;
+      return defaultField ? (defaultField.required ?? false) : false;
     }
     const field = config.find(f => f.key === fieldKey);
-    return field ? field.required : false;
+    return field ? (field.required ?? false) : false;
   }
 
   loadFieldConfiguration(): void {
@@ -164,17 +156,26 @@ export class EmployeeFormComponent implements OnInit {
         // Handle both JSON string and parsed array formats
         let fields: EmployeeField[] = [];
         if (response.data && response.data.fields) {
-          // Check if fields is a string (JSON) or already an array
+          // Normalize fields to EmployeeField[] regardless of format
+          let raw: any[] = [];
           if (typeof response.data.fields === 'string') {
             try {
-              fields = JSON.parse(response.data.fields);
-              console.log('[EmployeeForm] Parsed fields from JSON string:', fields);
+              raw = JSON.parse(response.data.fields);
+              console.log('[EmployeeForm] Parsed fields from JSON string:', raw);
             } catch (e) {
               console.log('[EmployeeForm] Failed to parse fields JSON string, using defaults');
             }
           } else if (Array.isArray(response.data.fields)) {
-            fields = response.data.fields;
+            raw = response.data.fields;
           }
+          // map to EmployeeField, defaulting required to false
+          fields = raw.map(r => ({
+            key: r.key,
+            label: r.label,
+            type: r.type,
+            enabled: r.enabled,
+            required: !!r.required
+          }));
         }
         
         if (fields.length > 0) {
@@ -252,7 +253,7 @@ export class EmployeeFormComponent implements OnInit {
             employeeCode: response.data.employeeCode || '',
             designation: response.data.designation || '',
             department: response.data.department || '',
-            employmentType: response.data.employmentType || 'Full-time',
+            employmentType: response.data.employmentType || 'FULL_TIME',
             employeeType: response.data.employeeType || 'Worker',
             salary: response.data.salary || 0,
             joiningDate: response.data.joiningDate ? new Date(response.data.joiningDate) : new Date(),

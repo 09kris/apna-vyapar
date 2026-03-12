@@ -209,7 +209,7 @@ interface SortConfig {
                 </td>
                 <td class="amount-cell">
                   <span class="amount">₹{{ order.totalAmount | number:'1.2-2' }}</span>
-                  <span class="items-count">{{ order.items?.length || 0 }} items</span>
+                  <span class="items-count">{{ order.items.length || 0 }} items</span>
                 </td>
                 <td class="status-cell">
                   <!-- Enhanced Status Badge with Icon -->
@@ -1173,7 +1173,7 @@ export class OrdersListComponent implements OnInit {
 
     this.orderService.getShopOrders(shopId).subscribe({
       next: (response) => {
-        const orders = response.data?.orders || response.data || [];
+        const orders: Order[] = response.data || [];
         this.orders.set(orders);
         this.applyFilters();
         this.loading.set(false);

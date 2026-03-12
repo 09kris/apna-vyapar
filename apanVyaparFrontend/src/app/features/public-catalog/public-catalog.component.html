@@ -76,9 +76,9 @@
               } @else {
                 <div class="no-image">📷</div>
               }
-              @if (product.mrp && product.mrp > product.retailPrice) {
+              @if (product.mrp != null && product.retailPrice != null && product.mrp > product.retailPrice) {
                 <span class="discount-badge">
-                  {{ getDiscountPercentage(product.mrp, product.retailPrice) }}% OFF
+                  {{ getDiscountPercentage(product.mrp || 0, product.retailPrice || 0) }}% OFF
                 </span>
               }
             </div>
@@ -89,11 +89,11 @@
               }
               <div class="product-pricing">
                 <span class="retail-price">{{ formatPrice(product.retailPrice) }}</span>
-                @if (product.mrp && product.mrp > product.retailPrice) {
+                @if (product.mrp != null && product.retailPrice != null && product.mrp > product.retailPrice) {
                   <span class="mrp-price">{{ formatPrice(product.mrp) }}</span>
                 }
               </div>
-              @if (product.stockQuantity <= product.reorderLevel) {
+              @if ((product.stockQuantity || 0) <= (product.reorderLevel || 0)) {
                 <span class="low-stock-badge">Low Stock</span>
               }
             </div>

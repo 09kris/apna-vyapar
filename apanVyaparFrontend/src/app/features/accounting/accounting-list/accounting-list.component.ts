@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountingService } from '../../../core/services/accounting.service';
-import { Accounting, AccountingDashboard } from '../../../core/models';
+import { Accounting, AccountingEntry, AccountingDashboard } from '../../../core/models';
 
 @Component({
   selector: 'app-accounting-list',
@@ -136,7 +136,11 @@ export class AccountingListComponent implements OnInit {
     }
   }
 
-  deleteTransaction(id: string): void {
+  deleteTransaction(id?: string): void {
+    if (!id) {
+      console.warn('deleteTransaction called without an id');
+      return;
+    }
     if (confirm('Are you sure you want to delete this transaction?')) {
       this.accountingService.deleteAccountingEntry(id).subscribe({
         next: (res) => {

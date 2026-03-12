@@ -120,7 +120,7 @@
                   <button class="btn btn-sm btn-outline" [routerLink]="['/payroll', payroll.id]" [queryParams]="{shopId: selectedShopId()}">
                     View
                   </button>
-                  @if (payroll.paymentStatus === 'Pending') {
+                  @if (payroll.paymentStatus === 'PENDING') {
                     <button class="btn btn-sm btn-success" [routerLink]="['/payroll', payroll.id, 'pay']" [queryParams]="{shopId: selectedShopId()}">
                       Mark Paid
                     </button>

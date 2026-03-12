@@ -133,8 +133,8 @@
               <td>₹{{ product.retailPrice | number:'1.2-2' }}</td>
               <td>₹{{ product.wholesalePrice | number:'1.2-2' }}</td>
               <td>
-                <span class="stock-badge" [class.low-stock]="product.stockQuantity <= product.reorderLevel">
-                  {{ product.stockQuantity }} {{ product.unit }}
+                <span class="stock-badge" [class.low-stock]="(product.stockQuantity ?? 0) <= (product.reorderLevel ?? 0)">
+                  {{ product.stockQuantity ?? 0 }} {{ product.unit }}
                 </span>
               </td>
               <td>

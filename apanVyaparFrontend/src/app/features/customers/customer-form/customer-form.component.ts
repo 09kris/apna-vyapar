@@ -29,7 +29,7 @@ export class CustomerFormComponent implements OnInit {
 
   // Form data
   formData = signal<CreateCustomerRequest>({
-    customerType: 'Retail',
+    customerType: 'RETAIL',
     fullName: '',
     phone: '',
     email: '',
@@ -58,17 +58,17 @@ export class CustomerFormComponent implements OnInit {
         if (response.data) {
           const customer = response.data;
           this.formData.set({
-            customerType: customer.customerType,
-            fullName: customer.fullName,
-            phone: customer.phone,
-            email: customer.email,
-            companyName: customer.companyName,
-            gstNumber: customer.gstNumber,
-            address: customer.address,
-            city: customer.city,
-            state: customer.state,
-            pincode: customer.pincode,
-            creditLimit: customer.creditLimit
+            customerType: customer.customerType || 'RETAIL',
+            fullName: customer.fullName || '',
+            phone: customer.phone || '',
+            email: customer.email || '',
+            companyName: customer.companyName || '',
+            gstNumber: customer.gstNumber || '',
+            address: customer.address || '',
+            city: customer.city || '',
+            state: customer.state || '',
+            pincode: customer.pincode || '',
+            creditLimit: customer.creditLimit || 0
           });
         }
         this.loading.set(false);

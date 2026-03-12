@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
-import { AuthService } from '../../core/services/auth.service';
 import { Notification } from '../../core/models';
 
 @Component({
@@ -14,7 +13,6 @@ import { Notification } from '../../core/models';
 })
 export class NotificationsComponent implements OnInit {
   private apiService = inject(ApiService);
-  private authService = inject(AuthService);
   private router = inject(Router);
 
   notifications = signal<Notification[]>([]);
@@ -33,16 +31,8 @@ export class NotificationsComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    const currentUser = this.authService.currentUser();
-    const userId = currentUser?.id || currentUser?.userId;
-    if (!userId) {
-      this.error.set('User not authenticated');
-      this.loading.set(false);
-      return;
-    }
-
-    // Get all notifications
-    this.apiService.getNotifications(userId).subscribe({
+    // Get all notifications - API doesn't require userId parameter
+    this.apiService.getNotifications().subscribe({
       next: (response) => {
         // Handle both paginated and direct array responses
         let notifications: Notification[] = [];
@@ -89,7 +79,7 @@ export class NotificationsComponent implements OnInit {
         // Update local state
         const updated = this.notifications().map(n => 
           n.id === notification.id 
-            ? { ...n, isRead: true, readAt: new Date() } 
+            ? { ...n, isRead: true, readAt: new Date().toISOString() } 
             : n
         );
         this.notifications.set(updated);
@@ -102,17 +92,14 @@ export class NotificationsComponent implements OnInit {
   }
 
   markAllAsRead(): void {
-    const currentUser = this.authService.currentUser();
-    const userId = currentUser?.id || currentUser?.userId;
-    if (!userId) return;
-
-    this.apiService.markAllNotificationsRead(userId).subscribe({
+    // Mark all notifications as read - API doesn't require userId
+    this.apiService.markAllNotificationsRead().subscribe({
       next: (response) => {
         // Update all notifications to read
         const updated = this.notifications().map(n => ({
           ...n,
           isRead: true,
-          readAt: new Date()
+          readAt: new Date().toISOString()
         }));
         this.notifications.set(updated);
         this.updateUnreadCount();

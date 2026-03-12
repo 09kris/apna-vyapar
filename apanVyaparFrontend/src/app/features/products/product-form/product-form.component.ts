@@ -21,6 +21,7 @@ export class ProductFormComponent implements OnInit {
 
   // Form data
   product = signal<CreateProductRequest>({
+    shopId: '',
     categoryId: '',
     productName: '',
     productCode: '',
@@ -182,6 +183,7 @@ export class ProductFormComponent implements OnInit {
         if (response.data) {
           const productData = response.data;
           this.product.set({
+            shopId: productData.shopId || '',
             categoryId: productData.categoryId,
             productName: productData.productName,
             productCode: productData.productCode,
@@ -277,12 +279,15 @@ export class ProductFormComponent implements OnInit {
       return false;
     }
 
-    if (product.retailPrice <= 0) {
+    const retailPrice = product.retailPrice ?? 0;
+    const wholesalePrice = product.wholesalePrice ?? 0;
+
+    if (retailPrice <= 0) {
       this.error.set('Retail price must be greater than 0');
       return false;
     }
 
-    if (product.wholesalePrice <= 0) {
+    if (wholesalePrice <= 0) {
       this.error.set('Wholesale price must be greater than 0');
       return false;
     }

@@ -3,17 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Shop, DashboardStats } from '../../../core/models';
+import { Shop, DashboardStats, ShopWithStats } from '../../../core/models';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-interface ShopWithStats extends Shop {
-  stats?: DashboardStats;
-  totalSales?: number;
-  totalOrders?: number;
-  totalCustomers?: number;
-}
+
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -162,7 +157,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     }).format(amount || 0);
   }
 
-  getShopTypeIcon(type: string): string {
+  getShopTypeIcon(type: string | undefined): string {
+    if (!type) return '🏪';
     switch (type) {
       case 'Retail': return '🏪';
       case 'Wholesale': return '🏭';

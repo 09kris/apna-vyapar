@@ -125,7 +125,7 @@ export class EmployeesListComponent implements OnInit {
   }
 
   deleteEmployee(employee: Employee): void {
-    if (!confirm(`Are you sure you want to terminate "${employee.user?.fullName || 'this employee'}"?`)) {
+    if (!confirm(`Are you sure you want to terminate "${employee.firstName} ${employee.lastName || ''}"?`)) {
       return;
     }
 
@@ -147,7 +147,7 @@ export class EmployeesListComponent implements OnInit {
 
   toggleEmployeeStatus(employee: Employee): void {
     const newStatus = !employee.isActive;
-    if (!confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} "${employee.user?.fullName || 'this employee'}"?`)) {
+    if (!confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} "${employee.firstName} ${employee.lastName || ''}"?`)) {
       return;
     }
 

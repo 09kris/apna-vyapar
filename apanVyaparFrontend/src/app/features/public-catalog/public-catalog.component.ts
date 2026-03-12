@@ -135,10 +135,10 @@ export class PublicCatalogComponent implements OnInit {
     // Sort products
     switch (this.sortBy()) {
       case 'price-low':
-        filtered.sort((a, b) => a.retailPrice - b.retailPrice);
+        filtered.sort((a, b) => (a.retailPrice || 0) - (b.retailPrice || 0));
         break;
       case 'price-high':
-        filtered.sort((a, b) => b.retailPrice - a.retailPrice);
+        filtered.sort((a, b) => (b.retailPrice || 0) - (a.retailPrice || 0));
         break;
       default:
         filtered.sort((a, b) => a.productName.localeCompare(b.productName));

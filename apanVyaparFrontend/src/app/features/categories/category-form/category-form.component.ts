@@ -132,7 +132,7 @@ export class CategoryFormComponent implements OnInit {
 
     if (this.isEditMode() && this.categoryId()) {
       // Update existing category
-      this.apiService.updateCategory(this.categoryId()!, this.shopId(), categoryData).subscribe({
+      this.apiService.updateCategory(this.categoryId()!, categoryData, this.shopId()).subscribe({
         next: () => {
           this.successMessage.set('Category updated successfully');
           this.saving.set(false);

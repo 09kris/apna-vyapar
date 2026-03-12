@@ -266,7 +266,8 @@ export class InventoryListComponent implements OnInit {
     }).format(amount);
   }
 
-  formatDate(date: Date | string): string {
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return '';
     return new Date(date).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
